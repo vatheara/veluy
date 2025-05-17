@@ -3,9 +3,10 @@ import { Banner, Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
 import 'nextra-theme-docs/style.css'
 import './globals.css'
+import './fonts/font.css'
 
 export const metadata = {
-   title: "Document | Veluy by Dommosray",
+   title: "Veluy",
    description: "This Veluy Library",
    icons: {
     icon: '/favicon.ico',
@@ -21,7 +22,12 @@ const navbar = (
     align='right'
   />
 )
-const footer = <Footer>MIT {new Date().getFullYear()} © Veluy.</Footer>
+const footer = <Footer>
+  <div className='flex flex-col text-gray-700 gap-2 w-full items-start'>
+    <p className='text-md'>Powered by <span className='font-semibold text-2xl text-black'>Domnossray</span></p>
+    <p className='text-md'>MIT {new Date().getFullYear()} © Veluy Project.</p>
+  </div>
+</Footer>
  
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -35,7 +41,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       >
         {/* Your additional tags should be passed as `children` of `<Head>` element */}
       </Head>
-      <body>
+      <body className='font-en'>
         <Layout
           banner={banner}
           navbar={navbar}

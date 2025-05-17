@@ -1,13 +1,21 @@
 /* English Fonts */
 @font-face {
-    font-family: 'chenla';
-    src: url('./Chenla-Regular.ttf') format('truetype');
+    font-family: 'battambang-regular';
+    src: url('./Battambang-Regular.ttf') format('truetype');
     font-weight: 500;
     font-style: normal;
   }
+@font-face {
+    font-family: 'open-sans-regular';
+    src: url('./OpenSans-VariableFont_wdth_wght.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
 
   /* Font Classes */
 .font-km {
-    font-family: 'chenla', sans-serif;
+    font-family: 'battambang-regular', sans-serif;
   }
-  
+.font-en {
+    font-family: 'open-sans-regular', sans-serif;
+  }
