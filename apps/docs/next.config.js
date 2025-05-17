@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+// const nextConfig = {};
 
-export default nextConfig;
+// export default nextConfig;
+import nextra from 'nextra'
+
+const withNextra = nextra({})
+
+export default withNextra({})
