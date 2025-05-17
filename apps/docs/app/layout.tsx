@@ -2,7 +2,8 @@ import { Footer, Layout, Navbar } from 'nextra-theme-docs'
 import { Banner, Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
 import 'nextra-theme-docs/style.css'
- 
+import './globals.css'
+
 export const metadata = {
    title: "Document | Veluy by Dommosray",
    description: "This Veluy Library",
@@ -22,14 +23,11 @@ const navbar = (
 )
 const footer = <Footer>MIT {new Date().getFullYear()} © Veluy.</Footer>
  
-export default async function RootLayout({ children }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
-      // Not required, but good for SEO
       lang="en"
-      // Required to be set
       dir="ltr"
-      // Suggested by `next-themes` package https://github.com/pacocoursey/next-themes#with-app
       suppressHydrationWarning
     >
       <Head
@@ -42,9 +40,13 @@ export default async function RootLayout({ children }) {
           banner={banner}
           navbar={navbar}
           pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/shuding/nextra/tree/main/docs"
+          sidebar={{ autoCollapse: true }}
+          docsRepositoryBase="https://github.com/vatheara/veluy"
+          feedback ={{
+            content: "Have feedback? Let us know!",
+            labels: "feedback",
+          }}
           footer={footer}
-          sidebar={{ autoCollapse: false }}
         >
           {children}
         </Layout>

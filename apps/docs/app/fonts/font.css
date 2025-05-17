@@ -1,0 +1,13 @@
+/* English Fonts */
+@font-face {
+    font-family: 'chenla';
+    src: url('./Chenla-Regular.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+  }
+
+  /* Font Classes */
+.font-km {
+    font-family: 'chenla', sans-serif;
+  }
+  
