@@ -1,10 +1,10 @@
 export default {
   index: {
-    title: 'Home',
-    type: 'page'
+    title: 'Introduction',
+    type: 'doc'
   },
-  documents: {
-    title: 'Documentation',
-    type: 'page'
+  getting_start: {
+    title: "Getting Start",
+    type: 'doc'
   },
 }
