@@ -25,7 +25,8 @@ const navbar = (
 const footer = <Footer>
   <div className='flex flex-col text-gray-700 gap-2 w-full items-start'>
     <p className='text-md'>Powered by <span className='font-semibold text-2xl text-black'>Domnossray</span></p>
-    <p className='text-md'>MIT {new Date().getFullYear()} © Veluy Project.</p>
+    {/* {new Date().getFullYear()} */}
+    <p className='text-md'>MIT 2025 © Veluy Project.</p>
   </div>
 </Footer>
  
