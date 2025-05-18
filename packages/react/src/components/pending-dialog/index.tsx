@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { usePendingDialogStore } from "@/stores/use-pending-dialog-store";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Button } from "../ui/button";
 
 export const PendingDialog = () => {
   const { isOpen, title, description, onConfirm, onCancel, setIsOpen } = usePendingDialogStore();
