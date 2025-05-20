@@ -3,11 +3,13 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "jsx": "react",
+    "jsx": "preserve",
     "baseUrl": "src",
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "strictNullChecks": true,
+    "skipLibCheck": true
   },
   "include": ["src"]
 }
