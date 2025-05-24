@@ -1,0 +1,15 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "docs": "0.1.0",
+    "web": "0.1.0",
+    "@repo/eslint-config": "0.0.0",
+    "@veluy/react": "1.0.0-alpha.0",
+    "@repo/typescript-config": "0.0.0",
+    "@repo/ui": "0.0.0"
+  },
+  "changesets": [
+    "brave-parents-grab"
+  ]
+}
