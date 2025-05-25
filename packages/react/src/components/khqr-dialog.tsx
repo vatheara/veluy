@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useKhqr } from "@/hook";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@repo/ui/components/dialog";
+import { Button } from "@repo/ui/components/button";
 import { QRCodeSVG } from "qrcode.react";
 import KhqrIcon from "@/assets/bakong/KHQR-Logo.png";
 import { useState, useEffect, useRef } from "react";

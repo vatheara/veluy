@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@repo/ui/components/button';
 import { KhqrDialog, useKhqr } from '../../dist/index';
+// import { KhqrDialog, useKhqr } from '../index';
 
 const meta = {
   component: KhqrDialog,

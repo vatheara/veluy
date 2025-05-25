@@ -24,19 +24,19 @@
   "author": "vatheara",
   "license": "ISC",
   "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^3",
     "@rollup/plugin-image": "^3.0.3",
     "@storybook/addon-essentials": "^8.6.12",
-    "@storybook/addon-onboarding": "^8.6.12",
     "@storybook/blocks": "^8.6.12",
     "@storybook/experimental-addon-test": "^8.6.12",
     "@storybook/react": "^8.6.12",
     "@storybook/react-vite": "^8.6.12",
     "@storybook/test": "^8.6.12",
+    "@tailwindcss/postcss": "^4.1.7",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0",
     "@vitejs/plugin-react": "^4.4.1",
@@ -48,7 +48,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "storybook": "^8.6.12",
-    "tailwindcss": "^3.4.1",
+    "tailwindcss": "^4.1.7",
     "typescript": "^5.8.3",
     "vite": "^5.2.6",
     "vite-plugin-dts": "^3.7.3",
@@ -56,6 +56,7 @@
   },
   "exports": {
     "./package.json": "./package.json",
+    "./style.css": "./dist/index.css",
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
@@ -76,6 +77,7 @@
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.13",
     "@radix-ui/react-slot": "^1.2.2",
+    "@repo/ui": "workspace:*",
     "@tanstack/react-query": "^5.76.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

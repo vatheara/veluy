@@ -6,7 +6,8 @@
     "jsx": "preserve",
     "baseUrl": "src",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@repo/ui/*": ["../../ui/src/*"]
     },
     "strictNullChecks": true,
     "skipLibCheck": true

@@ -17,6 +17,9 @@ export default defineConfig({
       '@': resolve(__dirname, './src')
     }
   },
+  css: {
+    postcss: './postcss.config.js',
+  },
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.tsx'),
@@ -31,9 +34,14 @@ export default defineConfig({
           react: 'React',
           'react-dom': 'ReactDOM',
         },
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.names?.[0] === 'style.css') return 'index.css';
+          return assetInfo.names?.[0] || 'assets/[name].[ext]';
+        },
       },
     },
     sourcemap: true,
     outDir: 'dist',
+    cssCodeSplit: false,
   },
 }); 
