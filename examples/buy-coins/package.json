@@ -9,10 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@repo/ui": "workspace:*",
+    "next": "15.1.8",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.3.2",
-    "@veluy/react": "workspace:*",
+    "@weluy/react": "1.0.0-alpha.1",
     "qrcode.react": "^4.1.0",
     "ts-khqr": "^1.0.0",
     "react-icons": "^5.0.0",

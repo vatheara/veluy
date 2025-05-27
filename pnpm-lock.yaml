@@ -112,13 +112,10 @@ importers:
 
   examples/buy-coins:
     dependencies:
-      '@radix-ui/react-dialog':
-        specifier: ^1.1.13
-        version: 1.1.13(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@radix-ui/react-slot':
-        specifier: ^1.2.2
-        version: 1.2.2(@types/react@19.1.0)(react@19.1.0)
-      '@veluy/react':
+      '@repo/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@weluy/react':
         specifier: workspace:*
         version: link:../../packages/react
       class-variance-authority:

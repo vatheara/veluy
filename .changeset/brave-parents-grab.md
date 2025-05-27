@@ -1,5 +1,5 @@
 ---
-"@veluy/react": patch
+"@weluy/react": patch
 ---
 
 basic hooks and ui

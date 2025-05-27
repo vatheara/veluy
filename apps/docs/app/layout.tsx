@@ -6,18 +6,18 @@ import './globals.css'
 import './fonts/font.css'
 
 export const metadata = {
-   title: "Veluy",
-   description: "This Veluy Library",
+   title: "Weluy",
+   description: "This Weluy Library",
    icons: {
     icon: '/favicon.ico',
   },
 }
  
-const banner = <Banner storageKey="some-key">Veluy 1.0 is released 🎉</Banner>
+const banner = <Banner storageKey="some-key">Weluy 1.0 is released 🎉</Banner>
 const navbar = (
   <Navbar
     logo={<b>VELUY</b>}
-    projectLink='https://github.com/vatheara/veluy'
+    projectLink='https://github.com/vatheara/weluy'
     logoLink='/'
     align='right'
   />
@@ -25,7 +25,7 @@ const navbar = (
 const footer = <Footer>
   <div className='flex flex-col text-gray-700 gap-2 w-full items-start'>
     <p className='text-md'>Powered by <span className='font-semibold text-2xl text-black'>Domnossray</span></p>
-    <p className='text-md'>MIT {new Date().getFullYear()} © Veluy Project.</p>
+    <p className='text-md'>MIT {new Date().getFullYear()} © Weluy Project.</p>
   </div>
 </Footer>
  
@@ -47,7 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           navbar={navbar}
           pageMap={await getPageMap()}
           sidebar={{ autoCollapse: true }}
-          docsRepositoryBase="https://github.com/vatheara/veluy"
+          docsRepositoryBase="https://github.com/vatheara/weluy"
           feedback ={{
             content: "Have feedback? Let us know!",
             labels: "feedback",

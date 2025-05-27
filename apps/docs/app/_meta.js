@@ -1,6 +1,6 @@
 export default {
   index: {
-    title: "Veluy",
+    title: "Weluy",
     type: 'page'
   },
   documents: {
