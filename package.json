@@ -1,5 +1,5 @@
 {
-  "name": "veluy",
+  "name": "weluy",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",

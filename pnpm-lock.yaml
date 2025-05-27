@@ -115,7 +115,7 @@ importers:
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@veluy/react':
+      '@weluy/react':
         specifier: workspace:*
         version: link:../../packages/react
       next:

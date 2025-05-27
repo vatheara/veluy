@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { Button } from "@repo/ui/components/button";
-import { KhqrDialog, useKhqr } from "@veluy/react";
+import { KhqrDialog, useKhqr } from "@weluy/react";
 
 export default function Home() {
   const { isOpen, title, description, onConfirm, onCancel, setIsOpen, sessionTime, expired, setSessionTime, setExpired } = useKhqr();
