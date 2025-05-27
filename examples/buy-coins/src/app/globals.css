@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "../../../../packages/ui/src/styles/globals.css";
+@import "../../../../packages/react/dist/index.css";
 
 :root {
   --background: #ffffff;

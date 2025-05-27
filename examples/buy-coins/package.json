@@ -11,7 +11,18 @@
   "dependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.3.2"
+    "next": "15.3.2",
+    "@veluy/react": "workspace:*",
+    "qrcode.react": "^4.1.0",
+    "ts-khqr": "^1.0.0",
+    "react-icons": "^5.0.0",
+    "zustand": "^5.0.0",
+    "@radix-ui/react-dialog": "^1.1.13",
+    "@radix-ui/react-slot": "^1.2.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.511.0",
+    "tailwind-merge": "^3.3.0"
   },
   "devDependencies": {
     "typescript": "^5",
