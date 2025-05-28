@@ -10,6 +10,8 @@ export default defineConfig({
       include: ['src/**/*.ts', 'src/**/*.tsx'],
       exclude: ['src/**/*.stories.tsx'],
       outDir: 'dist',
+      insertTypesEntry: true, // This ensures proper index.d.ts generation
+      rollupTypes: true, // This flattens the type declarations
     }),
   ],
   resolve: {
