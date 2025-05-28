@@ -1,6 +1,6 @@
 {
   "name": "@weluy/react",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "React component library for Weluy",
   "type": "module",
   "main": "./dist/index.js",
