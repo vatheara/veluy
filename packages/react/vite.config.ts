@@ -10,6 +10,8 @@ export default defineConfig({
       include: ['src/**/*.ts', 'src/**/*.tsx'],
       exclude: ['src/**/*.stories.tsx'],
       outDir: 'dist',
+      insertTypesEntry: true, // This ensures proper index.d.ts generation
+      rollupTypes: true, // This flattens the type declarations
     }),
   ],
   resolve: {
@@ -23,7 +25,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.tsx'),
-      name: 'VeluyReact',
+      name: 'WeluyReact',
       formats: ['es', 'cjs'],
       fileName: (format) => `index.${format === 'es' ? 'js' : 'cjs'}`,
     },
