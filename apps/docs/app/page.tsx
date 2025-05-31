@@ -6,7 +6,7 @@ const LandingPage = () => {
     <main className="min-h-screen bg-[#f3f4f6] text-gray-800">
     {/* Hero Section */}
     <section className="flex flex-col items-center justify-center text-center py-20 px-6 bg-white text-black">
-      <h1 className="text-4xl md:text-6xl font-bold mb-4">Weluy - <span className='font-km'>វេលុយ</span></h1>
+      <h1 className="text-4xl md:text-6xl font-bold mb-4">Veluy - <span className='font-km'>វេលុយ</span></h1>
       <p className="text-lg md:text-2xl max-w-2xl capitalize">
         A library to build payment integration with <Link href='https://bakong.nbc.gov.kh/' target='_blank' rel='noreferrer' className='font-bold underline'>Bakong</Link> just a few lines of code.
       </p>
@@ -18,7 +18,7 @@ const LandingPage = () => {
           Get Started
         </Link>
         <Link
-          href="https://github.com/vatheara/weluy"
+          href="https://github.com/vatheara/veluy"
           rel='noreferrer'
           target="_blank"
           className="bg-white text-black font-semibold px-6 py-3 rounded-xl shadow transition"
@@ -30,7 +30,7 @@ const LandingPage = () => {
 
     {/* Features Section */}
     <section className="py-20 px-6 max-w-5xl mx-auto">
-      <h2 className="text-3xl font-bold text-center mb-12">Why Weluy?</h2>
+      <h2 className="text-3xl font-bold text-center mb-12">Why Veluy?</h2>
       <div className="grid gap-8 md:grid-cols-3">
         <div className="bg-white p-6 rounded-xl shadow">
           <h3 className="text-xl font-semibold mb-2">⚡ Fast & Easy</h3>
@@ -49,7 +49,7 @@ const LandingPage = () => {
 
     {/* CTA */}
     <section className="text-center py-20 bg-white text-black">
-      <h2 className="text-3xl font-bold mb-4">Ready to build with Weluy?</h2>
+      <h2 className="text-3xl font-bold mb-4">Ready to build with Veluy?</h2>
       <p className="mb-8">Check out our docs and start contributing today.</p>
       <Link
         href="/documents"

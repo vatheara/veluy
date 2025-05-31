@@ -1,5 +1,5 @@
 ---
-"@weluy/react": minor
+"@veluy/react": minor
 ---
 
 added types

@@ -1,19 +1,19 @@
 {
-  "name": "@weluy/react",
+  "name": "@veluy/react",
   "version": "1.0.0-alpha.2",
-  "description": "React component library for Weluy",
+  "description": "React component library for Veluy",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vatheara/weluy.git",
+    "url": "https://github.com/vatheara/veluy.git",
     "directory": "packages/react"
   },
-  "homepage": "https://github.com/vatheara/weluy#readme",
+  "homepage": "https://github.com/vatheara/veluy#readme",
   "bugs": {
-    "url": "https://github.com/vatheara/weluy/issues"
+    "url": "https://github.com/vatheara/veluy/issues"
   },
   "scripts": {
     "build": "vite build",
