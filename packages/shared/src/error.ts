@@ -60,8 +60,8 @@ export interface SerializedUploadThingError {
 export class VeluyError<
   TShape extends Json = { message: string },
 > extends Micro.Error<{ message: string }> {
-  readonly _tag = "UploadThingError";
-  readonly name = "UploadThingError";
+  readonly _tag = "VeluyError";
+  readonly name = "VeluyError";
 
   public readonly cause?: unknown;
   public readonly code: ErrorCode;

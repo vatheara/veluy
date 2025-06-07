@@ -5,7 +5,7 @@ import * as S from "effect/Schema";
 
 import {
   filterDefinedObjectValues,
-  UploadThingError,
+  VeluyError,
 } from "@veluy/shared";
 
 import { UploadThingToken } from "./shared-schemas";
@@ -65,7 +65,7 @@ export const IsDevelopment = Config.boolean("isDev").pipe(
 export const UTToken = S.Config("token", UploadThingToken).pipe(
   Effect.catchTags({
     ConfigError: (e) =>
-      new UploadThingError({
+      new VeluyError({
         code: e._op === "InvalidData" ? "INVALID_SERVER_CONFIG" : "MISSING_ENV",
         message:
           e._op === "InvalidData"

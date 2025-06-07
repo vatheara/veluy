@@ -1,15 +1,15 @@
-import type { UploadThingError } from "@veluy/shared";
+import type { VeluyError } from "@veluy/shared";
 
 import type { FileRouter, inferErrorShape } from "../types";
 
-export function defaultErrorFormatter(error: UploadThingError) {
+export function defaultErrorFormatter(error: VeluyError) {
   return {
     message: error.message,
   };
 }
 
 export function formatError(
-  error: UploadThingError,
+  error: VeluyError,
   router: FileRouter,
 ): inferErrorShape<FileRouter[string]> {
   const firstSlug = Object.keys(router)[0];

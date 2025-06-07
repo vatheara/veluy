@@ -6,7 +6,7 @@ import {
   fetchEff,
   getErrorTypeFromStatusCode,
   parseResponseJson,
-  UploadThingError,
+  VeluyError,
 } from "@veluy/shared";
 
 import * as pkgJson from "../../package.json";
@@ -36,7 +36,7 @@ const createAPIRequestUrl = (config: {
 export type UTReporter = <TEvent extends keyof UTEvents>(
   type: TEvent,
   payload: UTEvents[TEvent]["in"],
-) => Micro.Micro<UTEvents[TEvent]["out"], UploadThingError, FetchContext>;
+) => Micro.Micro<UTEvents[TEvent]["out"], VeluyError, FetchContext>;
 
 /**
  * Creates a "client" for reporting events to the UploadThing server via the user's API endpoint.
@@ -81,7 +81,7 @@ export const createUTReporter =
         Micro.map(unsafeCoerce<unknown, UTEvents[typeof type]["out"]>),
         Micro.catchTag("FetchError", (e) =>
           Micro.fail(
-            new UploadThingError({
+            new VeluyError({
               code: "INTERNAL_CLIENT_ERROR",
               message: `Failed to report event "${type}" to UploadThing server`,
               cause: e,
@@ -90,7 +90,7 @@ export const createUTReporter =
         ),
         Micro.catchTag("BadRequestError", (e) =>
           Micro.fail(
-            new UploadThingError({
+            new VeluyError({
               code: getErrorTypeFromStatusCode(e.status),
               message: e.getMessage(),
               cause: e.json,
@@ -99,7 +99,7 @@ export const createUTReporter =
         ),
         Micro.catchTag("InvalidJson", (e) =>
           Micro.fail(
-            new UploadThingError({
+            new VeluyError({
               code: "INTERNAL_CLIENT_ERROR",
               message: "Failed to parse response from UploadThing server",
               cause: e,

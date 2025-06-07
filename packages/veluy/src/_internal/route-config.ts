@@ -12,7 +12,7 @@ import type {
 import {
   InvalidRouteConfigError,
   objectKeys,
-  UploadThingError,
+  VeluyError,
 } from "@veluy/shared";
 
 import type { FileRouter } from "../types";

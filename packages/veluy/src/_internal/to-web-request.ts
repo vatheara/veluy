@@ -2,7 +2,7 @@ import * as Config from "effect/Config";
 import * as Data from "effect/Data";
 import * as Effect from "effect/Effect";
 
-import { UploadThingError } from "@veluy/shared";
+import { VeluyError } from "@veluy/shared";
 
 type IncomingMessageLike = {
   method?: string | undefined;
@@ -62,7 +62,7 @@ export const getPostBody = <TBody = unknown>(opts: {
     on: (event: string, listener: (data: any) => void) => void;
   };
 }) =>
-  Effect.async<TBody | undefined, UploadThingError>((resume) => {
+  Effect.async<TBody | undefined, VeluyError>((resume) => {
     const { req } = opts;
     if (!req.method || !isBodyAllowed(req.method)) {
       return resume(Effect.succeed(undefined));
@@ -75,7 +75,7 @@ export const getPostBody = <TBody = unknown>(opts: {
           Effect.logError("Expected JSON content type, got:", contentType),
         );
         return resume(
-          new UploadThingError({
+          new VeluyError({
             code: "BAD_REQUEST",
             message: "INVALID_CONTENT_TYPE",
           }),
@@ -90,7 +90,7 @@ export const getPostBody = <TBody = unknown>(opts: {
           ),
         );
         return resume(
-          new UploadThingError({
+          new VeluyError({
             code: "BAD_REQUEST",
             message: "INVALID_BODY",
           }),
@@ -107,7 +107,7 @@ export const getPostBody = <TBody = unknown>(opts: {
       const parsedBody = Effect.try({
         try: () => JSON.parse(body) as TBody,
         catch: (err) =>
-          new UploadThingError({
+          new VeluyError({
             code: "BAD_REQUEST",
             message: "INVALID_JSON",
             cause: err,

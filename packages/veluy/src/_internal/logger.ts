@@ -11,7 +11,7 @@ import * as Layer from "effect/Layer";
 import * as Logger from "effect/Logger";
 import * as LogLevel from "effect/LogLevel";
 
-import { UploadThingError } from "@veluy/shared";
+import { VeluyError } from "@veluy/shared";
 
 import { IsDevelopment } from "./config";
 
@@ -45,7 +45,7 @@ export const withMinimalLogLevel = ConfigLogLevel("logLevel").pipe(
   Effect.catchTag(
     "ConfigError",
     (e) =>
-      new UploadThingError({
+      new VeluyError({
         code: "INVALID_SERVER_CONFIG",
         message: "Invalid server configuration",
         cause: e,
@@ -72,7 +72,7 @@ export const withLogFormat = Effect.gen(function* () {
   Effect.catchTag(
     "ConfigError",
     (e) =>
-      new UploadThingError({
+      new VeluyError({
         code: "INVALID_SERVER_CONFIG",
         message: "Invalid server configuration",
         cause: e,

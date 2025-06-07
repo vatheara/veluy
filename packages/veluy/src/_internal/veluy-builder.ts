@@ -1,7 +1,7 @@
 import type {
     Json,
     RouteOptions,
-    UploadThingError,
+    VeluyError,
   } from "@veluy/shared";
   
   import { defaultErrorFormatter } from "./error-formatter";
@@ -86,7 +86,7 @@ import type {
   }
   
   export type CreateBuilderOptions<TErrorShape extends Json> = {
-    errorFormatter: (err: UploadThingError) => TErrorShape;
+    errorFormatter: (err: VeluyError) => TErrorShape;
   };
   
   /**

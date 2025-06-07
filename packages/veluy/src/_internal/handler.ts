@@ -6,7 +6,7 @@ import {
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 
-import { UploadThingError } from "@veluy/shared";
+import { VeluyError } from "@veluy/shared";
 
 import * as pkgJson from "../../package.json";
 import type { AnyFileRoute, FileRouter, RouteHandlerOptions } from "../types";
@@ -79,7 +79,7 @@ export const createRequestHandler = <TRouter extends Record<string, AnyFileRoute
       return isDevelopment ? "void" : "await";
     })();
     if (isDevelopment && handleDaemon === "await") {
-      return yield* new UploadThingError({
+      return yield* new VeluyError({
         code: "INVALID_SERVER_CONFIG",
         message: 'handleDaemonPromise: "await" is forbidden in development.',
       });
