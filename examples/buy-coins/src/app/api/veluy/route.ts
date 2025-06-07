@@ -2,6 +2,6 @@ import { createRouteHandler } from "../../../../../../packages/veluy/next";
 import {ourFileRouter} from "./core"
 
 
-export const { GET } = createRouteHandler({
+export const { GET, POST } = createRouteHandler({
     router: ourFileRouter
 })

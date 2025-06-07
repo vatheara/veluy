@@ -217,3 +217,64 @@ export type UploadPutResult<TServerOutput = unknown> = {
   fileHash: string;
   serverData: TServerOutput;
 };
+
+/**
+ * This is a TypeScript utility type called `DeepPartial<T>`. Let me break down what it does:
+
+```221:225:packages/veluy/src/_internal/types.ts
+export type DeepPartial<T> = T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;
+```
+
+**What it does:**
+- Takes a generic type `T` and makes all properties at **all nested levels** optional
+- It's a recursive type that goes deeper into object structures
+
+**How it works:**
+1. **Conditional check**: `T extends object` - checks if the type is an object
+2. **If it's an object**: Creates a new type where:
+   - `[P in keyof T]` - iterates through each property key of T
+   - `?:` - makes each property optional
+   - `DeepPartial<T[P]>` - recursively applies DeepPartial to nested properties
+3. **If it's not an object**: Returns the type `T` unchanged (primitive types like string, number, etc.)
+
+**Example usage:**
+```typescript
+interface User {
+  id: number;
+  profile: {
+    name: string;
+    address: {
+      street: string;
+      city: string;
+    };
+  };
+}
+
+type PartialUser = DeepPartial<User>;
+// Result:
+// {
+//   id?: number;
+//   profile?: {
+//     name?: string;
+//     address?: {
+//       street?: string;
+//       city?: string;
+//     };
+//   };
+// }
+```
+
+This is commonly used for partial updates where you only want to update some fields in a deeply nested object structure, without having to provide all the required fields.
+ */
+
+export type DeepPartial<T> = T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;
+
+export type FileRouterInputConfig = Record<string, unknown>;

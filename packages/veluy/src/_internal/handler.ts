@@ -11,7 +11,6 @@ import { VeluyError } from "@veluy/shared";
 import * as pkgJson from "../../package.json";
 import type { AnyFileRoute, FileRouter, RouteHandlerOptions } from "../types";
 import { IsDevelopment } from "./config";
-import { extractRouterConfig } from "./route-config";
 import { makeRuntime } from "./runtime";
 
 export class AdapterArguments extends Context.Tag(
@@ -70,7 +69,7 @@ export const createRequestHandler = <TRouter extends Record<string, AnyFileRoute
 ) =>
   Effect.gen(function* () {
     const isDevelopment = yield* IsDevelopment;
-    const routerConfig = yield* extractRouterConfig(opts.router);
+    // const routerConfig = yield* extractRouterConfig(opts.router);
 
     const handleDaemon = (() => {
       if (opts.config?.handleDaemonPromise) {
@@ -86,7 +85,7 @@ export const createRequestHandler = <TRouter extends Record<string, AnyFileRoute
     }
 
     const GET = Effect.gen(function* () {
-      return yield* HttpServerResponse.json(routerConfig);
+      return yield* HttpServerResponse.json({message: "hello world"});
     });
 
 
