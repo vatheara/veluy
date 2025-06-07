@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { KhqrDialog, useKhqr } from "@veluy/react";
+import { KhqrDialog, useKhqr } from "@weluy/react";
 
 export default function Home() {
   const { setIsOpen } = useKhqr();

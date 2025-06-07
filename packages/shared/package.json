@@ -1,0 +1,51 @@
+{
+  "name": "@veluy/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "license": "MIT",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "lint": "eslint src test --max-warnings 0",
+    "build": "bunchee --tsconfig tsconfig.build.json",
+    "clean": "git clean -xdf dist node_modules",
+    "dev": "bunchee --tsconfig tsconfig.build.json --no-clean",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "effect": "3.14.21",
+    "sqids": "^0.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "@types/react": "19.1.2",
+    "@veluy/tsconfig": "workspace:",
+    "bunchee": "6.2.0",
+    "eslint": "9.25.1",
+    "react": "19.1.0",
+    "typescript": "5.8.3",
+    "wait-on": "^8.0.1"
+  }
+}

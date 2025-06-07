@@ -1,0 +1,5 @@
+{
+    "extends": "@veluy/tsconfig/base.build",
+    "include": ["src/**/*", "*.ts", "test"]
+  }
+  

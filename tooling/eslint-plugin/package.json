@@ -1,0 +1,15 @@
+{
+  "name": "@veluy/eslint-plugin",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.js"
+  },
+  "scripts": {
+    "clean": "git clean -xdf node_modules"
+  },
+  "dependencies": {
+    "@typescript-eslint/parser": "8.31.0",
+    "@typescript-eslint/utils": "8.31.0"
+  }
+}

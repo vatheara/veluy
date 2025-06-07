@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "ES2022"],
+    "target": "es2022",
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "downlevelIteration": true,
+    "resolveJsonModule": true,
+  },
+  "include": ["src/**/*", "*.ts" ]
+}
