@@ -1,15 +1,14 @@
 import * as LogLevel from 'effect/LogLevel';
-import { FetchEsque, ErrorMessage, MaybePromise, ExtendObjectIf } from '@veluy/shared';
+import { FetchEsque, MaybePromise, ExtendObjectIf } from '@veluy/shared';
 export { EndpointMetadata, ExpandedRouteConfig } from '@veluy/shared';
 import { LogFormat } from '../dist/_internal/logger.js';
-import { AnyFileRoute } from '../dist/_internal/types.js';
-export { AnyFileRoute, FileRoute, UTRegionAlias } from '../dist/_internal/types.js';
-export { ClientUploadedFileData, FileUploadData, FileUploadDataWithCustomId, NewPresignedUrl, UploadThingToken, UploadedFileData } from '../dist/_internal/shared-schemas.js';
+import { AnyTransactionRoute } from '../dist/_internal/types.js';
+export { AnyTransactionRoute, TransactionRoute, UTRegionAlias } from '../dist/_internal/types.js';
 
-type FileRouter = Record<string, AnyFileRoute>;
-type inferEndpointInput<TFileRoute extends AnyFileRoute> = TFileRoute["$types"]["input"];
-type inferEndpointOutput<TFileRoute extends AnyFileRoute> = TFileRoute["$types"]["output"];
-type inferErrorShape<TFileRoute extends AnyFileRoute> = TFileRoute["$types"]["errorShape"];
+type TransactionRouter = Record<string, AnyTransactionRoute>;
+type inferEndpointInput<TTransactionRoute extends AnyTransactionRoute> = TTransactionRoute["$types"]["input"];
+type inferEndpointOutput<TTransactionRoute extends AnyTransactionRoute> = TTransactionRoute["$types"]["output"];
+type inferErrorShape<TTransactionRoute extends AnyTransactionRoute> = TTransactionRoute["$types"]["errorShape"];
 type RouteHandlerConfig = {
     logLevel?: LogLevel.Literal;
     /**
@@ -19,10 +18,10 @@ type RouteHandlerConfig = {
      */
     logFormat?: LogFormat;
     /**
-     * The full, absolute URL to where your route handler is hosted. UploadThing
+     * The full, absolute URL to where your route handler is hosted. Veluy
      * attempts to automatically detect this value based on the request URL and
      * headers. You can override this if the automatic detection fails.
-     * @example URL { https://www.example.com/api/uploadthing }
+     * @example URL { https://www.example.com/api/veluy }
      */
     callbackUrl?: string;
     token?: string;
@@ -37,7 +36,7 @@ type RouteHandlerConfig = {
      */
     fetch?: FetchEsque;
     /**
-     * Set how UploadThing should handle the daemon promise before returning a response to the client.
+     * Set how Veluy should handle the daemon promise before returning a response to the client.
      * You can also provide a synchronous function that will be called before returning a response to
      * the client. This can be useful for things like:
      * -  [`@vercel/functions.waitUntil`](https://vercel.com/docs/functions/functions-api-reference#waituntil)
@@ -49,68 +48,47 @@ type RouteHandlerConfig = {
      */
     handleDaemonPromise?: "void" | "await" | ((promise: Promise<unknown>) => void);
     /**
-     * URL override for the ingest server
+     * URL override for the banking API server
      */
-    ingestUrl?: string;
+    bankingApiUrl?: string;
 };
-type RouteHandlerOptions<TRouter extends FileRouter> = {
+type RouteHandlerOptions<TRouter extends TransactionRouter> = {
     router: TRouter;
     config?: RouteHandlerConfig;
 };
-type UploadFilesOptions<TFileRoute extends AnyFileRoute> = {
+type CheckTransactionOptions<TTransactionRoute extends AnyTransactionRoute> = {
     /**
-     * The files to upload
+     * The MD5 hash to verify
      */
-    files: File[];
+    md5Hash: string;
     /**
-     * An AbortSignal to cancel the upload
+     * An AbortSignal to cancel the transaction check
      * Calling `abort()` on the parent AbortController will
-     * cause this function to throw an `UploadAbortedError`
+     * cause this function to throw a `TransactionAbortedError`
      */
     signal?: AbortSignal | undefined;
     /**
-     * Called when presigned URLs have been retrieved and the file upload is about to begin
+     * Called when transaction verification begins
      */
-    onUploadBegin?: ((opts: {
-        file: string;
+    onTransactionBegin?: ((opts: {
+        md5Hash: string;
     }) => void) | undefined;
     /**
-     * Called continuously as the file is uploaded to the storage provider
+     * Called continuously as the transaction is being verified
      */
-    onUploadProgress?: ((opts: {
-        /** The file that triggered the progress event */
-        file: File;
-        /** Percentage of the file that has been uploaded */
+    onTransactionProgress?: ((opts: {
+        /** The MD5 hash being verified */
+        md5Hash: string;
+        /** Current verification step */
+        step: string;
+        /** Progress percentage */
         progress: number;
-        /** Total bytes of the file that has been uploaded */
-        loaded: number;
-        /** How many bytes have been uploaded since the last progress event for this file */
-        delta: number;
-        /** Total bytes uploaded for all files in this upload */
-        totalLoaded: number;
-        /** Percentage of the total loaded bytes for the upload */
-        totalProgress: number;
     }) => void) | undefined;
     /**
-     * This option has been moved to your serverside route config.
-     * Please opt-in by setting `awaitServerData: false` in your route
-     * config instead.
-     * ### Example
-     * ```ts
-     * f(
-     *   { image: { maxFileSize: "1MB" } },
-     *   { awaitServerData: false }
-     * ).middleware(...)
-     * ```
-     * @deprecated
-     * @see https://docs.uploadthing.com/api-reference/server#route-options
-     */
-    skipPolling?: ErrorMessage<"This option has been moved to your serverside route config. Please use `awaitServerData` in your route config instead.">;
-    /**
-     * URL to the UploadThing API endpoint
-     * @example URL { http://localhost:3000/api/uploadthing }
-     * @example URL { https://www.example.com/api/uploadthing }
-     * @remarks This option is not required when `uploadFiles` has been generated with `genUploader`
+     * URL to the Veluy API endpoint
+     * @example URL { http://localhost:3000/api/veluy }
+     * @example URL { https://www.example.com/api/veluy }
+     * @remarks This option is not required when `checkTransaction` has been generated with `genTransactionChecker`
      */
     url: URL;
     /**
@@ -119,85 +97,64 @@ type UploadFilesOptions<TFileRoute extends AnyFileRoute> = {
      */
     headers?: HeadersInit | (() => MaybePromise<HeadersInit>) | undefined;
     /**
-     * The uploadthing package that is making this request, used to identify the client in the server logs
+     * The veluy package that is making this request, used to identify the client in the server logs
      * @example "@veluy/react"
-     * @remarks This option is not required when `uploadFiles` has been generated with `genUploader`
+     * @remarks This option is not required when `checkTransaction` has been generated with `genTransactionChecker`
      */
     package: string;
-} & ExtendObjectIf<inferEndpointInput<TFileRoute>, {
-    input: inferEndpointInput<TFileRoute>;
+} & ExtendObjectIf<inferEndpointInput<TTransactionRoute>, {
+    input: inferEndpointInput<TTransactionRoute>;
 }>;
-type CreateUploadOptions<TFileRoute extends AnyFileRoute> = {
+type CreateTransactionCheckOptions<TTransactionRoute extends AnyTransactionRoute> = {
     /**
-     * The files to upload
+     * The MD5 hash to verify
      */
-    files: File[];
+    md5Hash: string;
     /**
-     * Called continuously as the file is uploaded to the storage provider
+     * Called continuously as the transaction is being verified
      */
-    onUploadProgress?: ((opts: {
-        /** The file that triggered the progress event */
-        file: File;
-        /** Percentage of the file that has been uploaded */
+    onTransactionProgress?: ((opts: {
+        /** The MD5 hash being verified */
+        md5Hash: string;
+        /** Current verification step */
+        step: string;
+        /** Progress percentage */
         progress: number;
-        /** Total bytes of the file that has been uploaded */
-        loaded: number;
-        /** How many bytes have been uploaded since the last progress event for this file */
-        delta: number;
-        /** Total bytes uploaded for all files in this upload */
-        totalLoaded: number;
-        /** Percentage of the total loaded bytes for the upload */
-        totalProgress: number;
     }) => void) | undefined;
     /**
      * Set custom headers that'll get sent with requests
      * to your server
      */
     headers?: HeadersInit | (() => MaybePromise<HeadersInit>) | undefined;
-} & ExtendObjectIf<inferEndpointInput<TFileRoute>, {
-    input: inferEndpointInput<TFileRoute>;
+} & ExtendObjectIf<inferEndpointInput<TTransactionRoute>, {
+    input: inferEndpointInput<TTransactionRoute>;
 }>;
-type GenerateUploaderOptions = {
+type GenerateTransactionCheckerOptions = {
     /**
-     * URL to the UploadThing API endpoint
-     * @example /api/uploadthing
-     * @example URL { https://www.example.com/api/uploadthing }
+     * URL to the Veluy API endpoint. If relative, host will be inferred from
+     * either the `VERCEL_URL` environment variable or `window.location.origin`
      *
-     * If relative, host will be inferred from either the `VERCEL_URL` environment variable or `window.location.origin`
-     *
-     * @default (VERCEL_URL ?? window.location.origin) + "/api/uploadthing"
+     * @default (VERCEL_URL ?? window.location.origin) + "/api/veluy"
+     * @example /api/veluy
+     * @example URL { https://www.example.com/api/veluy }
      */
     url?: string | URL;
     /**
      * Provide a custom fetch implementation.
      * @default `globalThis.fetch`
-     * @example
-     * ```ts
-     * fetch: (input, init) => {
-     *   if (input.toString().startsWith(MY_SERVER_URL)) {
-     *     // Include cookies in the request to your API
-     *     return fetch(input, {
-     *       ...init,
-     *       credentials: "include",
-     *     });
-     *   }
-     *
-     *   return fetch(input, init);
-     * }
-     * ```
      */
     fetch?: FetchEsque | undefined;
     /**
-     * The uploadthing package that is making this request
+     * The veluy package that is making this request
      * @example "@veluy/react"
      *
      * This is used to identify the client in the server logs
      */
     package?: string;
 };
-type EndpointArg<TRouter extends FileRouter, TEndpoint extends keyof TRouter> = TEndpoint | ((_: RouteRegistry<TRouter>) => TEndpoint);
-type RouteRegistry<TRouter extends FileRouter> = {
+type EndpointArg<TRouter extends TransactionRouter, TEndpoint extends keyof TRouter> = TEndpoint | ((_: RouteRegistry<TRouter>) => TEndpoint);
+type RouteRegistry<TRouter extends TransactionRouter> = {
     [k in keyof TRouter]: k;
 };
 
-export type { CreateUploadOptions, EndpointArg, FileRouter, GenerateUploaderOptions, RouteHandlerConfig, RouteHandlerOptions, RouteRegistry, UploadFilesOptions, inferEndpointInput, inferEndpointOutput, inferErrorShape };
+export type { CheckTransactionOptions, CreateTransactionCheckOptions, EndpointArg, GenerateTransactionCheckerOptions, RouteHandlerConfig, RouteHandlerOptions, RouteRegistry, TransactionRouter, inferEndpointInput, inferEndpointOutput, inferErrorShape };

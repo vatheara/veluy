@@ -1,6 +1,6 @@
 import type { VeluyError } from "@veluy/shared";
 
-import type { FileRouter, inferErrorShape } from "../types";
+import type { TransactionRouter, inferErrorShape } from "../types";
 
 export function defaultErrorFormatter(error: VeluyError) {
   return {
@@ -10,8 +10,8 @@ export function defaultErrorFormatter(error: VeluyError) {
 
 export function formatError(
   error: VeluyError,
-  router: FileRouter,
-): inferErrorShape<FileRouter[string]> {
+  router: TransactionRouter,
+): inferErrorShape<TransactionRouter[string]> {
   const firstSlug = Object.keys(router)[0];
   const errorFormatter = firstSlug
     ? (router[firstSlug]?.errorFormatter ?? defaultErrorFormatter)

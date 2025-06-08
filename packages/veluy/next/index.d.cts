@@ -1,16 +1,16 @@
 import * as ___internal_types from '../dist/_internal/types.cjs';
-export { UTFiles, UTRegion as experimental_UTRegion } from '../dist/_internal/types.cjs';
+export { UTTransactionData, UTRegion as experimental_UTRegion } from '../dist/_internal/types.cjs';
 import * as _veluy_shared from '@veluy/shared';
 import { Json } from '@veluy/shared';
 import { NextRequest } from 'next/server';
 import { CreateBuilderOptions } from '../dist/_internal/veluy-builder.cjs';
-import { FileRouter, RouteHandlerOptions } from '../types/index.js';
-export { FileRouter } from '../types/index.js';
+import { TransactionRouter, RouteHandlerOptions } from '../types/index.js';
+export { TransactionRouter } from '../types/index.js';
 
 type AdapterArgs = {
     req: NextRequest;
 };
-declare const createVeluy: <TErrorShape extends Json>(opts?: CreateBuilderOptions<TErrorShape>) => <TRouteOptions extends _veluy_shared.RouteOptions>(input: any, config?: TRouteOptions) => ___internal_types.UploadBuilder<{
+declare const createVeluy: <TErrorShape extends Json>(opts?: CreateBuilderOptions<TErrorShape>) => <TRouteOptions extends _veluy_shared.RouteOptions>(input: any, config?: TRouteOptions) => ___internal_types.VeluyBuilder<{
     _routeOptions: TRouteOptions;
     _input: {
         in: ___internal_types.UnsetMarker;
@@ -22,7 +22,7 @@ declare const createVeluy: <TErrorShape extends Json>(opts?: CreateBuilderOption
     _errorFn: ___internal_types.UnsetMarker;
     _output: ___internal_types.UnsetMarker;
 }>;
-declare const createRouteHandler: <TRouter extends FileRouter>(opts: RouteHandlerOptions<TRouter>) => {
+declare const createRouteHandler: <TRouter extends TransactionRouter>(opts: RouteHandlerOptions<TRouter>) => {
     POST: (args_0: NextRequest) => Promise<Response>;
     GET: (args_0: NextRequest) => Promise<Response>;
 };

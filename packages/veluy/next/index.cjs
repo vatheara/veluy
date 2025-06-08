@@ -34,9 +34,9 @@ const createRouteHandler = (opts)=>{
     };
 };
 
-Object.defineProperty(exports, "UTFiles", {
+Object.defineProperty(exports, "UTTransactionData", {
   enumerable: true,
-  get: function () { return types_cjs.UTFiles; }
+  get: function () { return types_cjs.UTTransactionData; }
 });
 Object.defineProperty(exports, "experimental_UTRegion", {
   enumerable: true,

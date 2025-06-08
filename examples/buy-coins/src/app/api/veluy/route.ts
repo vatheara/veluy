@@ -1,4 +1,4 @@
-import { createRouteHandler } from "../../../../../../packages/veluy/next";
+import { createRouteHandler } from "../../../../../../packages/veluy/src/next";
 import {ourFileRouter} from "./core"
 
 

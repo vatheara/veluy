@@ -12,10 +12,8 @@ import type {
 
 import type { JsonParser } from "./parser";
 import type {
-  FileUploadDataWithCustomId,
   NewPresignedUrl,
   UploadActionPayload,
-  UploadedFileData,
 } from "./shared-schemas";
 
 export type UTRegionAlias =
@@ -33,23 +31,23 @@ export type UTRegionAlias =
 /**
  * Marker used to select the region based on the incoming request
  */
-export const UTRegion = Symbol("uploadthing-region-symbol");
+export const UTRegion = Symbol("veluy-region-symbol");
 
 /**
- * Marker used to append a `customId` to the incoming file data in `.middleware()`
+ * Marker used to append custom metadata to transaction data in `.middleware()`
  * @example
  * ```ts
  * .middleware((opts) => {
  *   return {
- *     [UTFiles]: opts.files.map((file) => ({
- *       ...file,
+ *     [UTTransactionData]: {
  *       customId: generateId(),
- *     }))
+ *       userId: opts.input.userId,
+ *     }
  *   };
  * })
  * ```
  */
-export const UTFiles = Symbol("uploadthing-custom-id-symbol");
+export const UTTransactionData = Symbol("veluy-transaction-data-symbol");
 
 export type UnsetMarker = "unsetMarker" & {
   __brand: "unsetMarker";
@@ -57,7 +55,7 @@ export type UnsetMarker = "unsetMarker" & {
 
 export type ValidMiddlewareObject = {
   [UTRegion]?: UTRegionAlias;
-  [UTFiles]?: Partial<FileUploadDataWithCustomId>[];
+  [UTTransactionData]?: Record<string, unknown>;
   [key: string]: unknown;
 };
 
@@ -67,10 +65,10 @@ export interface AnyParams {
     in: any;
     out: any;
   };
-  _metadata: any; // imaginary field used to bind metadata return type to an Upload resolver
+  _metadata: any; // imaginary field used to bind metadata return type to a transaction resolver
   _adapterFnArgs: Record<string, unknown>;
   _errorShape: any;
-  _errorFn: any; // used for onUploadError
+  _errorFn: any; // used for onTransactionError
   _output: any;
 }
 
@@ -80,35 +78,38 @@ type MiddlewareFn<
   TArgs extends Record<string, unknown>,
 > = (
   opts: TArgs & {
-    files: Schema.Type<typeof UploadActionPayload>["files"];
     input: TInput extends UnsetMarker ? undefined : TInput;
   },
 ) => MaybePromise<TOutput>;
 
-type UploadCompleteFn<
+// Transaction-related types
+type TransactionCompleteFn<
   TMetadata,
   TOutput extends JsonObject | void,
   TArgs extends Record<string, unknown>,
 > = (
   opts: TArgs & {
     metadata: TMetadata;
-    file: UploadedFileData;
+    transactionId: string;
+    md5Hash: string;
+    bankingResponse: any;
   },
 ) => MaybePromise<TOutput>;
 
-type UploadErrorFn<TArgs extends Record<string, unknown>> = (
+type TransactionErrorFn<TArgs extends Record<string, unknown>> = (
   input: TArgs & {
     error: VeluyError;
-    fileKey: string;
+    transactionId: string;
+    md5Hash?: string;
   },
 ) => MaybePromise<void>;
 
-export interface UploadBuilder<TParams extends AnyParams> {
+export interface VeluyBuilder<TParams extends AnyParams> {
   input: <TIn extends Json, TOut>(
     parser: TParams["_input"]["in"] extends UnsetMarker
       ? JsonParser<TIn, TOut>
       : ErrorMessage<"input is already set">,
-  ) => UploadBuilder<{
+  ) => VeluyBuilder<{
     _routeOptions: TParams["_routeOptions"];
     _input: { in: TIn; out: TOut };
     _metadata: TParams["_metadata"];
@@ -125,7 +126,7 @@ export interface UploadBuilder<TParams extends AnyParams> {
           TParams["_adapterFnArgs"]
         >
       : ErrorMessage<"middleware is already set">,
-  ) => UploadBuilder<{
+  ) => VeluyBuilder<{
     _routeOptions: TParams["_routeOptions"];
     _input: TParams["_input"];
     _metadata: TOutput;
@@ -134,30 +135,30 @@ export interface UploadBuilder<TParams extends AnyParams> {
     _errorFn: TParams["_errorFn"];
     _output: UnsetMarker;
   }>;
-  onUploadError: (
+  onTransactionError: (
     fn: TParams["_errorFn"] extends UnsetMarker
-      ? UploadErrorFn<TParams["_adapterFnArgs"]>
-      : ErrorMessage<"onUploadError is already set">,
-  ) => UploadBuilder<{
+      ? TransactionErrorFn<TParams["_adapterFnArgs"]>
+      : ErrorMessage<"onTransactionError is already set">,
+  ) => VeluyBuilder<{
     _routeOptions: TParams["_routeOptions"];
     _input: TParams["_input"];
     _metadata: TParams["_metadata"];
     _adapterFnArgs: TParams["_adapterFnArgs"];
     _errorShape: TParams["_errorShape"];
-    _errorFn: UploadErrorFn<TParams["_adapterFnArgs"]>;
+    _errorFn: TransactionErrorFn<TParams["_adapterFnArgs"]>;
     _output: UnsetMarker;
   }>;
-  onUploadComplete: <TOutput extends JsonObject | void>(
-    fn: UploadCompleteFn<
+  onTransactionComplete: <TOutput extends JsonObject | void>(
+    fn: TransactionCompleteFn<
       Simplify<
         TParams["_metadata"] extends UnsetMarker
           ? undefined
-          : Omit<TParams["_metadata"], typeof UTFiles | typeof UTRegion>
+          : Omit<TParams["_metadata"], typeof UTTransactionData | typeof UTRegion>
       >,
       TOutput,
       TParams["_adapterFnArgs"]
     >,
-  ) => FileRoute<{
+  ) => TransactionRoute<{
     input: TParams["_input"]["in"] extends UnsetMarker
       ? undefined
       : TParams["_input"]["in"];
@@ -170,106 +171,34 @@ export interface UploadBuilder<TParams extends AnyParams> {
   }>;
 }
 
-export type AnyBuiltUploaderTypes = {
+export type AnyBuiltTransactionTypes = {
   input: any;
   output: any;
   errorShape: any;
 };
 
-export interface FileRoute<TTypes extends AnyBuiltUploaderTypes> {
+export interface TransactionRoute<TTypes extends AnyBuiltTransactionTypes> {
   $types: TTypes;
   routerConfig: any;
   routeOptions: RouteOptions;
   inputParser: JsonParser<any>;
   middleware: MiddlewareFn<any, ValidMiddlewareObject, any>;
-  onUploadError: UploadErrorFn<any>;
+  onTransactionError: TransactionErrorFn<any>;
   errorFormatter: (err: VeluyError) => any;
-  onUploadComplete: UploadCompleteFn<any, any, any>;
+  onTransactionComplete: TransactionCompleteFn<any, any, any>;
 }
-export type AnyFileRoute = FileRoute<AnyBuiltUploaderTypes>;
+export type AnyTransactionRoute = TransactionRoute<AnyBuiltTransactionTypes>;
 
 /**
  * Map actionType to the required payload for that action
  * @todo Look into using @effect/rpc :thinking:
  */
 export type UTEvents = {
-  upload: {
-    in: UploadActionPayload;
-    out: ReadonlyArray<NewPresignedUrl>;
+  transaction: {
+    in: { md5Hash: string };
+    out: { status: string; verified: boolean };
   };
 };
-
-/**
- * Result from the PUT request to the UploadThing Ingest server
- */
-export type UploadPutResult<TServerOutput = unknown> = {
-  ufsUrl: string;
-  /**
-   * @deprecated
-   * This field will be removed in uploadthing v9. Use `ufsUrl` instead.
-   */
-  url: string;
-  /**
-   * @deprecated
-   * This field will be removed in uploadthing v9. Use `ufsUrl` instead.
-   */
-  appUrl: string;
-  fileHash: string;
-  serverData: TServerOutput;
-};
-
-/**
- * This is a TypeScript utility type called `DeepPartial<T>`. Let me break down what it does:
-
-```221:225:packages/veluy/src/_internal/types.ts
-export type DeepPartial<T> = T extends object
-  ? {
-      [P in keyof T]?: DeepPartial<T[P]>;
-    }
-  : T;
-```
-
-**What it does:**
-- Takes a generic type `T` and makes all properties at **all nested levels** optional
-- It's a recursive type that goes deeper into object structures
-
-**How it works:**
-1. **Conditional check**: `T extends object` - checks if the type is an object
-2. **If it's an object**: Creates a new type where:
-   - `[P in keyof T]` - iterates through each property key of T
-   - `?:` - makes each property optional
-   - `DeepPartial<T[P]>` - recursively applies DeepPartial to nested properties
-3. **If it's not an object**: Returns the type `T` unchanged (primitive types like string, number, etc.)
-
-**Example usage:**
-```typescript
-interface User {
-  id: number;
-  profile: {
-    name: string;
-    address: {
-      street: string;
-      city: string;
-    };
-  };
-}
-
-type PartialUser = DeepPartial<User>;
-// Result:
-// {
-//   id?: number;
-//   profile?: {
-//     name?: string;
-//     address?: {
-//       street?: string;
-//       city?: string;
-//     };
-//   };
-// }
-```
-
-This is commonly used for partial updates where you only want to update some fields in a deeply nested object structure, without having to provide all the required fields.
- */
 
 export type DeepPartial<T> = T extends object
   ? {
@@ -277,4 +206,4 @@ export type DeepPartial<T> = T extends object
     }
   : T;
 
-export type FileRouterInputConfig = Record<string, unknown>;
+export type TransactionRouterInputConfig = Record<string, unknown>;

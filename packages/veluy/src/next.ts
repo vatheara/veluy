@@ -6,11 +6,11 @@ import type { Json } from "@veluy/shared";
 import { makeAdapterHandler } from "./_internal/handler";
 import type { CreateBuilderOptions } from "./_internal/veluy-builder";
 import { createBuilder } from "./_internal/veluy-builder";
-import type { FileRouter, RouteHandlerOptions } from "./types";
+import type { TransactionRouter, RouteHandlerOptions } from "./types";
 
-export type { FileRouter };
+export type { TransactionRouter };
 export {
-  UTFiles,
+  UTTransactionData,
   /**
    * This is an experimental feature.
    * You need to be feature flagged on our backend to use this
@@ -26,7 +26,7 @@ export const createVeluy = <TErrorShape extends Json>(
   opts?: CreateBuilderOptions<TErrorShape>,
 ) => createBuilder<AdapterArgs, TErrorShape>(opts);
 
-export const createRouteHandler = <TRouter extends FileRouter>(
+export const createRouteHandler = <TRouter extends TransactionRouter>(
   opts: RouteHandlerOptions<TRouter>,
 ) => {
   const handler = makeAdapterHandler<[NextRequest], AdapterArgs>(

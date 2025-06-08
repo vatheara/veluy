@@ -1,3 +1,30 @@
+/**
+ * Transaction Builder for Veluy
+ * 
+ * Example usage for MD5 transaction checking:
+ * 
+ * ```typescript
+ * const transactionRoute = createBuilder()
+ *   .input(z.object({ md5Hash: z.string() }))
+ *   .middleware(async ({ input }) => {
+ *     // Validate MD5 hash format
+ *     if (!/^[a-f0-9]{32}$/i.test(input.md5Hash)) {
+ *       throw new Error("Invalid MD5 hash format");
+ *     }
+ *     return { transactionId: generateTransactionId() };
+ *   })
+ *   .onTransactionComplete(async ({ metadata, md5Hash, bankingResponse }) => {
+ *     // Handle successful transaction verification
+ *     console.log(`Transaction ${metadata.transactionId} verified successfully`);
+ *     return { status: "success", verified: true };
+ *   })
+ *   .onTransactionError(async ({ error, transactionId, md5Hash }) => {
+ *     // Handle transaction verification errors
+ *     console.error(`Transaction ${transactionId} failed:`, error.message);
+ *   });
+ * ```
+ */
+
 import type {
     Json,
     RouteOptions,
@@ -6,10 +33,10 @@ import type {
   
   import { defaultErrorFormatter } from "./error-formatter";
   import type {
-    AnyBuiltUploaderTypes,
-    AnyFileRoute,
+    AnyBuiltTransactionTypes,
+    AnyTransactionRoute,
     UnsetMarker,
-    UploadBuilder,
+    VeluyBuilder,
   } from "./types";
   
   function internalCreateBuilder<
@@ -17,8 +44,8 @@ import type {
     TRouteOptions extends RouteOptions,
     TErrorShape extends Json = { message: string },
   >(
-    initDef: Partial<AnyFileRoute> = {},
-  ): UploadBuilder<{
+    initDef: Partial<AnyTransactionRoute> = {},
+  ): VeluyBuilder<{
     _routeOptions: TRouteOptions;
     _input: { in: UnsetMarker; out: UnsetMarker };
     _metadata: UnsetMarker;
@@ -27,12 +54,12 @@ import type {
     _errorFn: UnsetMarker;
     _output: UnsetMarker;
   }> {
-    const _def: AnyFileRoute = {
-      $types: {} as AnyBuiltUploaderTypes,
-      // Default router config
+    const _def: AnyTransactionRoute = {
+      $types: {} as AnyBuiltTransactionTypes,
+      // Default transaction config
       routerConfig: {
-        image: {
-          maxFileSize: "4MB",
+        transaction: {
+          timeout: "30s",
         },
       },
       routeOptions: {
@@ -46,10 +73,10 @@ import type {
       },
   
       middleware: () => ({}),
-      onUploadError: () => {
+      onTransactionError: () => {
         // noop
       },
-      onUploadComplete: () => undefined,
+      onTransactionComplete: () => undefined,
   
       errorFormatter: initDef.errorFormatter ?? defaultErrorFormatter,
   
@@ -62,25 +89,25 @@ import type {
         return internalCreateBuilder({
           ..._def,
           inputParser: userParser,
-        }) as UploadBuilder<any>;
+        }) as VeluyBuilder<any>;
       },
       middleware(userMiddleware) {
         return internalCreateBuilder({
           ..._def,
           middleware: userMiddleware,
-        }) as UploadBuilder<any>;
+        }) as VeluyBuilder<any>;
       },
-      onUploadComplete(userUploadComplete) {
+      onTransactionComplete(userTransactionComplete) {
         return {
           ..._def,
-          onUploadComplete: userUploadComplete,
-        } as AnyFileRoute;
+          onTransactionComplete: userTransactionComplete,
+        } as AnyTransactionRoute;
       },
-      onUploadError(userOnUploadError) {
+      onTransactionError(userOnTransactionError) {
         return internalCreateBuilder({
           ..._def,
-          onUploadError: userOnUploadError,
-        }) as UploadBuilder<any>;
+          onTransactionError: userOnTransactionError,
+        }) as VeluyBuilder<any>;
       },
     };
   }
@@ -95,7 +122,7 @@ import type {
    * @public
    *
    * @param opts - Options for the builder
-   * @returns A file route builder for making UploadThing file routes
+   * @returns A transaction route builder for making Veluy transaction routes
    */
   export function createBuilder<
     TAdapterFnArgs extends Record<string, unknown>,
@@ -104,7 +131,7 @@ import type {
     return <TRouteOptions extends RouteOptions>(
       input: any,
       config?: TRouteOptions,
-    ): UploadBuilder<{
+    ): VeluyBuilder<{
       _routeOptions: TRouteOptions;
       _input: { in: UnsetMarker; out: UnsetMarker };
       _metadata: UnsetMarker;
