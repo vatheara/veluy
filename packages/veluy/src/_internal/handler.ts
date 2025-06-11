@@ -44,24 +44,23 @@ export const makeAdapterHandler = <
   );
 
   const app = (...args: Args) =>
-    createRequestHandler(opts, beAdapter ?? "custom").pipe(
+    Effect.map(
+      Effect.promise(() =>
+        managed.runPromise(createRequestHandler(opts, beAdapter ?? "custom")),
+      ),
       Effect.provideServiceEffect(AdapterArguments, makeAdapterArgs(...args)),
     );
 
-  return async (...args: Args) => {
-    const result = await Effect.gen(function* () {
-      const handler = yield* handle;
-      const router = yield* app(...args);
-      const request = yield* toRequest(...args);
-
-      return yield* Effect.promise(() => handler(router as any)(request));
-    }).pipe(
-      Effect.withLogSpan("requestHandler"),
-      managed.runPromise,
-    );
-
-    return result;
-  };
+    return async (...args: Args) => {
+      const result = await handle.pipe(
+        Effect.ap(app(...args)),
+        Effect.ap(toRequest(...args)),
+        Effect.withLogSpan("requestHandler"),
+        managed.runPromise,
+      );
+  
+      return result;
+    };
 };
 
 export const createRequestHandler = <
@@ -141,8 +140,10 @@ export const createRequestHandler = <
       const routeKey = Object.keys(opts.router)[0];
       if (routeKey) {
         const route = opts.router[routeKey];
-        const adapterArgs = yield* AdapterArguments;
-        
+        const adapterArgs = yield* AdapterArguments.pipe(
+          Effect.catchAll(() => Effect.succeed({}))
+        );
+
         try {
           // Execute middleware
           const metadata = route.middleware({ 

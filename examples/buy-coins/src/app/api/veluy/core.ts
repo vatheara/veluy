@@ -4,7 +4,7 @@ import { type TransactionRouter } from "../../../../../../packages/veluy/src/typ
 const f = createVeluy();
 
 // FileRouter for your app, can contain multiple FileRoutes
-export const ourFileRouter = {
+export const ourTransactionRouter = {
     // Define as many FileRoutes as you like, each with a unique routeSlug
     transaction: f({
        
@@ -23,4 +23,4 @@ export const ourFileRouter = {
       })
       ,
   } satisfies TransactionRouter;
-  export type OurFileRouter = typeof ourFileRouter;
+  export type OurTransactionRouter = typeof ourTransactionRouter;
