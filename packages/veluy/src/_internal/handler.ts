@@ -53,8 +53,6 @@ export const makeAdapterHandler = <
       const handler = yield* handle;
       const router = yield* app(...args);
       const request = yield* toRequest(...args);
-      // log request
-      yield* Effect.logInfo("Request", request.json());
 
       return yield* Effect.promise(() => handler(router as any)(request));
     }).pipe(
@@ -99,19 +97,12 @@ export const createRequestHandler = <
     });
 
     const POST = Effect.gen(function* () {
-      // TODO: Extract MD5 hash from request body
-      // TODO: Call banking API to check transaction status
-      // TODO: Handle transaction complete/error callbacks
-      
-      // Basic implementation - extract MD5 hash from request body
       const request = yield* HttpServerRequest.HttpServerRequest;
       
-      yield* Effect.logInfo("Parsing request body");
-      const body = yield* request.json as any;
-      
-      yield* Effect.logInfo("Request body parsed").pipe(
-        Effect.annotateLogs("body", body)
-      );
+      // Safely parse JSON body with error handling
+      const body = yield* request.json.pipe(
+        Effect.catchAll(() => Effect.succeed(null))
+      )
       
       if (!body || !body.md5Hash) {
         yield* Effect.logError("Missing md5Hash in request body").pipe(
