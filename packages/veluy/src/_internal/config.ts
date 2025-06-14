@@ -10,13 +10,13 @@ import {
 
 import { UploadThingToken } from "./shared-schemas";
 
-export { version as UPLOADTHING_VERSION } from "../../package.json";
+export { version as VELUY_VERSION } from "../../package.json";
 
 /**
  * Merge in `import.meta.env` to the built-in `process.env` provider
- * Prefix keys with `UPLOADTHING_` so we can reference just the name.
+ * Prefix keys with `VELUY_` so we can reference just the name.
  * @example
- * process.env.UPLOADTHING_TOKEN = "foo"
+ * process.env.VELUY_TOKEN = "foo"
  * Config.string("token"); // Config<"foo">
  */
 const envProvider = ConfigProvider.fromEnv().pipe(
@@ -39,7 +39,7 @@ const envProvider = ConfigProvider.fromEnv().pipe(
       },
     ),
   ),
-  ConfigProvider.nested("uploadthing"),
+  ConfigProvider.nested("veluy"),
   ConfigProvider.constantCase,
 );
 
@@ -62,7 +62,7 @@ export const IsDevelopment = Config.boolean("isDev").pipe(
   Config.withDefault(false),
 );
 
-export const UTToken = S.Config("token", UploadThingToken).pipe(
+export const BKToken = S.Config("token", UploadThingToken).pipe(
   Effect.catchTags({
     ConfigError: (e) =>
       new VeluyError({
@@ -70,38 +70,14 @@ export const UTToken = S.Config("token", UploadThingToken).pipe(
         message:
           e._op === "InvalidData"
             ? "Invalid token. A token is a base64 encoded JSON object matching { apiKey: string, appId: string, regions: string[] }."
-            : "Missing token. Please set the `UPLOADTHING_TOKEN` environment variable or provide a token manually through config.",
+            : "Missing token. Please set the `BAKONG_API_TOKEN` environment variable or provide a token manually through config.",
         cause: e,
       }),
   }),
 );
 
 export const ApiUrl = Config.string("apiUrl").pipe(
-  Config.withDefault("https://api.uploadthing.com"),
+  Config.withDefault("https://api-bakong.nbc.gov.kh"),
   Config.mapAttempt((_) => new URL(_)),
   Config.map((url) => url.href.replace(/\/$/, "")),
-);
-
-export const IngestUrl = Effect.fn(function* (
-  preferredRegion: string | undefined,
-) {
-  const { regions, ingestHost } = yield* UTToken;
-
-  const region = preferredRegion
-    ? (regions.find((r) => r === preferredRegion) ?? regions[0])
-    : regions[0];
-
-  return yield* Config.string("ingestUrl").pipe(
-    Config.withDefault(`https://${region}.${ingestHost}`),
-    Config.mapAttempt((_) => new URL(_)),
-    Config.map((url) => url.href.replace(/\/$/, "")),
-  );
-});
-
-export const UtfsHost = Config.string("utfsHost").pipe(
-  Config.withDefault("utfs.io"),
-);
-
-export const UfsHost = Config.string("ufsHost").pipe(
-  Config.withDefault("ufs.sh"),
 );

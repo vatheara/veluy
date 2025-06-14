@@ -204,3 +204,13 @@ export const createRequestHandler = <
       HttpRouter.use(appendResponseHeaders),
     );
   }).pipe(Effect.withLogSpan("createRequestHandler"));
+
+
+  const handleCheckTransaction = (md5Hash: string) => {
+    return Effect.gen(function* () {
+      const request = yield* HttpServerRequest.HttpServerRequest;
+      const body = yield* request.json.pipe(
+        Effect.catchAll(() => Effect.succeed(null))
+      )
+    })
+  }
