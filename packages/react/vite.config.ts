@@ -25,16 +25,38 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.tsx'),
-      name: 'WeluyReact',
+      name: 'VeluyReact',
       formats: ['es', 'cjs'],
       fileName: (format) => `index.${format === 'es' ? 'js' : 'cjs'}`,
     },
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      external: [
+        'react', 
+        'react-dom',
+        // Externalize all peerDependencies to avoid bundling them
+        '@tanstack/react-query',
+        'lucide-react',
+        'react-icons',
+        'react-icons/fi',
+        'zustand',
+        'qrcode.react',
+        'ts-khqr',
+        // Externalize workspace dependencies
+        '@repo/ui',
+        /^@repo\/ui\/.*/,
+        // Externalize other common dependencies
+        'clsx',
+        'tailwind-merge',
+        'class-variance-authority'
+      ],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
+          'qrcode.react': 'QRCodeReact', 
+          'ts-khqr': 'TSKHQR',
+          'react-icons/fi': 'ReactIconsFi',
+          '@repo/ui': 'RepoUI',
         },
         assetFileNames: (assetInfo) => {
           if (assetInfo.names?.[0] === 'style.css') return 'index.css';
