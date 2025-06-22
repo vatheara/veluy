@@ -41,7 +41,7 @@
   "devDependencies": {
     "@types/node": "^22.15.29",
     "@types/react": "19.1.2",
-    "@veluy/tsconfig": "workspace:",
+    "@veluy/tsconfig": "workspace:*",
     "bunchee": "6.2.0",
     "eslint": "9.25.1",
     "react": "19.1.0",

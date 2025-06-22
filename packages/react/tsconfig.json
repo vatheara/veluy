@@ -4,10 +4,12 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "preserve",
-    "baseUrl": "src",
+    "baseUrl": "../..",
     "paths": {
-      "@/*": ["./*"],
-      "@repo/ui/*": ["../../ui/src/*"]
+      "@repo/ui/*": ["../../ui/src/*"],
+      "veluy/*":["packages/veluy/src/*"],
+      "@veluy/shared":["packages/shared/src/*"],
+      "@/*": ["packages/react/src/*"],
     },
     "strictNullChecks": true,
     "skipLibCheck": true

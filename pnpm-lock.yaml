@@ -20,6 +20,9 @@ importers:
       typescript:
         specifier: 5.8.2
         version: 5.8.2
+      veluy:
+        specifier: workspace:*
+        version: link:packages/veluy
 
   apps/docs:
     dependencies:
@@ -230,46 +233,22 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.2
         version: 1.2.2(@types/react@19.1.0)(react@19.1.0)
-      '@repo/ui':
+      '@veluy/shared':
         specifier: workspace:*
-        version: link:../ui
-      '@tanstack/react-query':
-        specifier: ^5.76.1
-        version: 5.76.1(react@19.1.0)
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
+        version: link:../shared
       cmdk:
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      lucide-react:
-        specifier: ^0.511.0
-        version: 0.511.0(react@19.1.0)
-      qrcode.react:
-        specifier: ^4.2.0
-        version: 4.2.0(react@19.1.0)
-      react-icons:
-        specifier: ^5.5.0
-        version: 5.5.0(react@19.1.0)
-      tailwind-merge:
-        specifier: ^3.3.0
-        version: 3.3.0
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@4.1.7)
-      ts-khqr:
-        specifier: ^2.1.3
-        version: 2.1.3
-      zustand:
-        specifier: ^5.0.4
-        version: 5.0.4(@types/react@19.1.0)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
     devDependencies:
       '@chromatic-com/storybook':
         specifier: ^3
         version: 3.2.6(react@19.1.0)(storybook@8.6.12(prettier@3.5.3))
+      '@repo/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@rollup/plugin-image':
         specifier: ^3.0.3
         version: 3.0.3(rollup@4.40.2)
@@ -294,12 +273,18 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4.1.7
         version: 4.1.7
+      '@tanstack/react-query':
+        specifier: ^5.76.1
+        version: 5.76.1(react@19.1.0)
       '@types/node':
         specifier: ^22.15.3
         version: 22.15.29
       '@types/react':
         specifier: 19.1.0
         version: 19.1.0
+      '@veluy/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/tsconfig
       '@vitejs/plugin-react':
         specifier: ^4.4.1
         version: 4.4.1(vite@5.4.19(@types/node@22.15.29)(lightningcss@1.30.1))
@@ -312,24 +297,45 @@ importers:
       autoprefixer:
         specifier: ^10.4.17
         version: 10.4.21(postcss@8.5.3)
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      lucide-react:
+        specifier: ^0.511.0
+        version: 0.511.0(react@19.1.0)
       playwright:
         specifier: ^1.52.0
         version: 1.52.0
       postcss:
         specifier: ^8.4.35
         version: 8.5.3
+      qrcode.react:
+        specifier: ^4.2.0
+        version: 4.2.0(react@19.1.0)
       react:
         specifier: ^19.0.0
         version: 19.1.0
       react-dom:
         specifier: ^19.0.0
         version: 19.1.0(react@19.1.0)
+      react-icons:
+        specifier: ^5.5.0
+        version: 5.5.0(react@19.1.0)
       storybook:
         specifier: ^8.6.12
         version: 8.6.12(prettier@3.5.3)
+      tailwind-merge:
+        specifier: ^3.3.0
+        version: 3.3.0
       tailwindcss:
         specifier: ^4.1.7
         version: 4.1.7
+      ts-khqr:
+        specifier: ^2.1.3
+        version: 2.1.3
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -342,6 +348,9 @@ importers:
       vitest:
         specifier: ^3.1.3
         version: 3.1.3(@types/debug@4.1.12)(@types/node@22.15.29)(@vitest/browser@3.1.3)(lightningcss@1.30.1)
+      zustand:
+        specifier: ^5.0.4
+        version: 5.0.4(@types/react@19.1.0)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
 
   packages/shared:
     dependencies:
@@ -359,7 +368,7 @@ importers:
         specifier: 19.1.2
         version: 19.1.2
       '@veluy/tsconfig':
-        specifier: 'workspace:'
+        specifier: workspace:*
         version: link:../../tooling/tsconfig
       bunchee:
         specifier: 6.2.0

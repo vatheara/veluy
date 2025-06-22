@@ -5,15 +5,28 @@ import { Button } from "@repo/ui/components/button";
 import { QRCodeSVG } from "qrcode.react";
 import KhqrIcon from "@/assets/bakong/KHQR-Logo.png";
 import { useState, useEffect, useRef } from "react";
-import { KHQR, TAG, CURRENCY } from "ts-khqr";
 import LoadingSpinner from "./loading-spinner";
 import { FiClock } from "react-icons/fi";
 
 
 export const KhqrDialog = () => {
-  const { isOpen, title, description, onConfirm, onCancel, setIsOpen, sessionTime, expired, setSessionTime, setExpired } = useKhqr();
-  const [qrstring, setQrstring] = useState("");
-  const [md5, setMd5] = useState("");
+  const { 
+    isOpen, 
+    title, 
+    description,  
+    setIsOpen, 
+    sessionTime, 
+    expired, 
+    setSessionTime, 
+    setExpired,
+    transactionStatus,
+    qrstring,
+    md5,
+    amount,
+    merchantName,
+    generateQR,
+    resetTransaction
+  } = useKhqr();
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const cardWidth = 190;
@@ -21,54 +34,26 @@ export const KhqrDialog = () => {
   const nameFontSize = 10;
   const amountFontSize = 14;
 
-  const generateQR = () => {
-    setSessionTime(180);
-    setExpired(false);
-    const result = KHQR.generate({
-      tag: TAG.INDIVIDUAL,
-      accountID: "va_theara1@aclb",
-      merchantName: "Domnossrai",
-      currency: CURRENCY.USD,
-      amount: 9,
-    });
-
-    if (result.data) {
-      setQrstring(result.data.qr);
-      setMd5(result.data.md5);
-      // console.log(result.data.md5);
-    }
-  };
-
+  // Notify parent component when MD5 hash is available for polling
   useEffect(() => {
-    if (isOpen) {
-      generateQR();
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+    if (md5 && transactionStatus === 'pending') {
+      // The VeluyButton component will handle the actual status polling
+      // This is just for logging/debugging
+      console.log("QR code generated with MD5 hash:", md5);
     }
-  }, [isOpen]);
-
-  useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      if (md5 && !expired) {
-        console.log("handle check hash")
-      }
-    }, 3000);
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [expired, md5 ]);
+  }, [md5, transactionStatus]);
 
   const handleCancel = () => {
     setIsOpen(false);
+    resetTransaction();
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
   };
 
+  const handleTryAgain = () => {
+    generateQR();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -77,20 +62,37 @@ export const KhqrDialog = () => {
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        {expired ? (
+        {expired || transactionStatus === 'expired' ? (
           <div className="flex flex-col items-center justify-center gap-2">
             <FiClock size={64} />
             <div>Session Expired</div>
             <div className="text-sm">
               Press Try Again to resume transaction.
             </div>
-            <Button onClick={generateQR}>Try Again</Button>
+            <Button onClick={handleTryAgain}>Try Again</Button>
+          </div>
+        ) : transactionStatus === 'completed' ? (
+          <div className="flex flex-col items-center justify-center gap-2">
+            <div className="text-green-600 text-2xl">✓</div>
+            <div>Payment Successful!</div>
+            <div className="text-sm text-center">
+              Your transaction has been completed successfully.
+            </div>
+          </div>
+        ) : transactionStatus === 'failed' ? (
+          <div className="flex flex-col items-center justify-center gap-2">
+            <div className="text-red-600 text-2xl">✗</div>
+            <div>Payment Failed</div>
+            <div className="text-sm text-center">
+              An error occurred while processing your payment.
+            </div>
+            <Button onClick={handleTryAgain}>Try Again</Button>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
             <div className="flex justify-between">
-              <div>${9} per month</div>
-              <Timer />
+              <div>${amount} USD</div>
+              {transactionStatus === 'pending' && <Timer />}
             </div>
             <div className="flex items-center justify-center">
               <div
@@ -107,19 +109,25 @@ export const KhqrDialog = () => {
                 </div>
                 <div className=" flex justify-center">
                   <div className="mx-[10%] my-[3%] w-[130px]">
-                    <div style={{ fontSize: nameFontSize }}>Domnossrai</div>
+                    <div style={{ fontSize: nameFontSize }}>{merchantName}</div>
                     <div
                       style={{ fontSize: amountFontSize }}
                       className={`text-[${amountFontSize}px] flex items-center font-bold`}
                     >
-                      {9}
+                      {amount}
                       <span className="ml-[8px] text-[8px]">USD</span>
                     </div>
                   </div>
                 </div>
                 <div className="flex justify-center">
                   <div className="mx-[10%] my-[8%] h-[130px] w-[130px] bg-black">
-                    <QRCodeSVG value={qrstring} />
+                    {qrstring ? (
+                      <QRCodeSVG value={qrstring} width="100%" height="100%" />
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <LoadingSpinner theme="light" />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -130,10 +138,6 @@ export const KhqrDialog = () => {
             <Button onClick={handleCancel}>Cancel</Button>
           </div>
         )}
-        <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>Cancel</Button>
-          <Button onClick={onConfirm}>Confirm</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -147,7 +151,6 @@ function Timer() {
   useEffect(() => {
     if (seconds > 0) {
       const interval = setInterval(() => {
-        // console.log("still running");
         setSeconds(seconds - 1);
       }, 1000);
       return () => clearInterval(interval);

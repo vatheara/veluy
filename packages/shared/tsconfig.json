@@ -5,6 +5,12 @@
         "moduleResolution": "bundler",
         "module": "ESNext",
         "types": ["node"],
+        "baseUrl": "../..",
+        "paths": {
+            "@veluy/shared":["packages/shared/src/"],
+            "@veluy/react":["packages/react/src/*"],
+            "veluy/*":["packages/veluy/src/*"]
+        }
     },
     "include": ["src/**/*", "*.ts", "test"]
   }

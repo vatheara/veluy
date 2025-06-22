@@ -10,7 +10,7 @@ const meta = {
     (Story) => {
       const { setIsOpen, setTitle, setDescription } = useKhqr();
       return (
-        <div className="p-4">
+        <div className="flex flex-col p-4 gap-4">
           <Button onClick={() => {
             setIsOpen(true);
             setTitle("Hello");
