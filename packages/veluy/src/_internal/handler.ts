@@ -3,12 +3,14 @@ import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 
-import { VeluyError } from "@veluy/shared";
+import { VeluyError, getStatusCodeFromError } from "@veluy/shared";
+import { formatError } from "./error-formatter";
 
 import * as pkgJson from "../../package.json";
 import type { AnyTransactionRoute, TransactionRouter, RouteHandlerOptions } from "../types";
 import { IsDevelopment } from "./config";
 import { makeRuntime } from "./runtime";
+import { extractRouterConfig } from "./route-config";
 
 export class AdapterArguments extends Context.Tag(
   "veluy/AdapterArguments",
@@ -71,6 +73,7 @@ export const createRequestHandler = <
 ) =>
   Effect.gen(function* () {
     const isDevelopment = yield* IsDevelopment;
+    const routerConfig = yield* extractRouterConfig(opts.router);
 
     const handleDaemon = (() => {
       if (opts.config?.handleDaemonPromise) {
@@ -89,14 +92,30 @@ export const createRequestHandler = <
       return yield* HttpServerResponse.json({ 
         message: "Veluy Transaction Checker API",
         version: pkgJson.version,
-        endpoints: {
-          "POST /check": "Check transaction status using MD5 hash"
-        }
+        router: routerConfig
       });
     });
 
     const POST = Effect.gen(function* () {
       const request = yield* HttpServerRequest.HttpServerRequest;
+
+      const { slug } = yield* HttpRouter.schemaParams(
+        Schema.Struct({
+          slug: Schema.String,
+        }),
+      );
+
+      yield* Effect.log(slug);
+      const isValidRoute = opts.router[slug];
+      Effect.log(isValidRoute)
+      if (!isValidRoute) {
+        const msg = `No route found for slug ${slug}`;
+        yield* Effect.logError(msg);
+        return yield* new VeluyError({
+          code: "NOT_FOUND",
+          message: msg,
+        });
+      }
       
       // Safely parse JSON body with error handling
       const body = yield* request.json.pipe(
@@ -192,7 +211,27 @@ export const createRequestHandler = <
         status: "processed",
         note: "Basic implementation - replace banking API call with actual integration"
       });
-    });
+    }).pipe(
+      Effect.catchTags({
+        ParseError: (e) =>
+          HttpServerResponse.json(
+            formatError(
+              new VeluyError({
+                code: "BAD_REQUEST",
+                message: "Invalid input",
+                cause: e.message,
+              }),
+              opts.router,
+            ),
+            { status: 400 },
+          ),
+        VeluyError: (e) =>
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          HttpServerResponse.json(formatError(e, opts.router), {
+            status: getStatusCodeFromError(e),
+          }),
+      }),
+    );
 
     const appendResponseHeaders = Effect.map(
       HttpServerResponse.setHeader("x-veluy-version", pkgJson.version),

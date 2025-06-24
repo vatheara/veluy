@@ -1,14 +1,18 @@
 import { createVeluy } from "../../../../../../packages/veluy/src/next";
 import { type TransactionRouter } from "../../../../../../packages/veluy/src/types";
 
-const f = createVeluy();
+const f = createVeluy({
+  errorFormatter: (err ) => {
+    console.log("Error in transaction", err.message);
+    console.log("  - Above error caused by:", err.cause);
+    return { message: err.message };
+  },
+});
 
 // TransactionRouter for your app, can contain multiple TransactionRoutes
 export const ourTransactionRouter = {
     // Define as many TransactionRoutes as you like, each with a unique routeSlug
-    transaction: f({
-       
-    })
+    transaction: f({ any:"any" })
       // Set permissions and file types for this FileRoute
       .middleware(async () => {
         // This code runs on your server before checking the transaction
