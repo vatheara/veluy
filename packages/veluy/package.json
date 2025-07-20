@@ -43,6 +43,7 @@
     "effect": "^3.16.16"
   },
   "devDependencies": {
+    "@effect/language-service": "^0.27.2",
     "@types/react": "19.1.2",
     "@veluy/tsconfig": "workspace:*",
     "bunchee": "6.2.0",

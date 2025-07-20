@@ -35,7 +35,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "effect": "3.14.21",
+    "effect": "^3.16.16",
     "sqids": "^0.3.0"
   },
   "devDependencies": {

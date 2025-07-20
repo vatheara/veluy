@@ -365,8 +365,8 @@ importers:
   packages/shared:
     dependencies:
       effect:
-        specifier: 3.14.21
-        version: 3.14.21
+        specifier: ^3.16.16
+        version: 3.16.16
       sqids:
         specifier: ^0.3.0
         version: 0.3.0
@@ -474,6 +474,9 @@ importers:
         specifier: ^3.16.16
         version: 3.16.16
     devDependencies:
+      '@effect/language-service':
+        specifier: ^0.27.2
+        version: 0.27.2
       '@types/react':
         specifier: 19.1.2
         version: 19.1.2
@@ -739,6 +742,10 @@ packages:
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
     engines: {node: '>=12'}
+
+  '@effect/language-service@0.27.2':
+    resolution: {integrity: sha512-AFgxoIZ6xpfwCZp7+1mj3f1HsK3Yqe9I0iUfpf8Iu2gl9F3dmdFiOvuoLRVSkfVsK2BTQr8kv2zPi53Lst2haw==}
+    hasBin: true
 
   '@effect/platform@0.84.3':
     resolution: {integrity: sha512-XllmJA72oK9W81roMLRkxKfkoVA4oKBDjJs9Qz+42FK5IuA2jtzbt0f8L1lWZeHhmogIaWe0Ux8ObhdoGAvnJA==}
@@ -3901,9 +3908,6 @@ packages:
 
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
-
-  effect@3.14.21:
-    resolution: {integrity: sha512-TKR7zfWcuZgEdWd+oIGA8LdREj/c+1Q0wz4pWqQtYT7VHnkW/QQEYCXgrDI5dT6lJgRTgyQAC1bAnpAf6MdjIA==}
 
   effect@3.16.16:
     resolution: {integrity: sha512-q8jsuAJykQJJ9jDkR9VaAR1JeHnEDn49g6+LkveIcfW3nIPUJw6BrC9ZPaVCJWmU23vKoVj9XqJmC/EW8kiI8g==}
@@ -7718,6 +7722,8 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
 
+  '@effect/language-service@0.27.2': {}
+
   '@effect/platform@0.84.3(effect@3.16.16)':
     dependencies:
       effect: 3.16.16
@@ -11054,11 +11060,6 @@ snapshots:
   eastasianwidth@0.2.0: {}
 
   ee-first@1.1.1: {}
-
-  effect@3.14.21:
-    dependencies:
-      '@standard-schema/spec': 1.0.0
-      fast-check: 3.23.2
 
   effect@3.16.16:
     dependencies:
