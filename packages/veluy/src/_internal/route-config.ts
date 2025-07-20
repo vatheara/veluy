@@ -3,7 +3,6 @@ import { objectKeys } from "@veluy/shared";
 
 import type { TransactionRouter } from "../types";
 
-
 export const extractRouterConfig = <TRouter extends TransactionRouter>(
   router: TRouter,
 ) =>

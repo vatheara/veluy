@@ -1,11 +1,11 @@
 import { create } from "zustand";
 
-export type TransactionStatus = 
-  | "pending" 
-  | "processing" 
-  | "completed" 
-  | "failed" 
-  | "expired" 
+export type TransactionStatus =
+  | "pending"
+  | "processing"
+  | "completed"
+  | "failed"
+  | "expired"
   | "cancelled"
   | "idle";
 
@@ -41,7 +41,7 @@ interface KhqrDialogStore {
 
 export const useKhqr = create<KhqrDialogStore>((set, get) => ({
   sessionTime: 180,
-  expired: false, 
+  expired: false,
   isOpen: false,
   title: "",
   description: "",
@@ -62,36 +62,39 @@ export const useKhqr = create<KhqrDialogStore>((set, get) => ({
   setMd5: (md5) => set({ md5 }),
   setAmount: (amount) => set({ amount }),
   setMerchantName: (merchantName) => set({ merchantName }),
-  resetTransaction: () => set({ 
-    transactionHash: null, 
-    transactionStatus: "idle", 
-    qrstring: "", 
-    md5: "", 
-    expired: false,
-    sessionTime: 180
-  }),
+  resetTransaction: () =>
+    set({
+      transactionHash: null,
+      transactionStatus: "idle",
+      qrstring: "",
+      md5: "",
+      expired: false,
+      sessionTime: 180,
+    }),
   generateQR: () => {
     const { amount, merchantName } = get();
-    
-    // Import KHQR dynamically to avoid build issues
-    import('ts-khqr').then(({ KHQR, TAG, CURRENCY }) => {
-      const result = KHQR.generate({
-        tag: TAG.INDIVIDUAL,
-        accountID: "va_theara1@aclb",
-        merchantName,
-        currency: CURRENCY.USD,
-        amount,
-      });
 
-      if (result.data) {
-        set({ 
-          qrstring: result.data.qr, 
-          md5: result.data.md5,
-          sessionTime: 180,
-          expired: false,
-          transactionStatus: 'pending' // Update status when QR is ready
+    // Import KHQR dynamically to avoid build issues
+    import("ts-khqr")
+      .then(({ KHQR, TAG, CURRENCY }) => {
+        const result = KHQR.generate({
+          tag: TAG.INDIVIDUAL,
+          accountID: "va_theara1@aclb",
+          merchantName,
+          currency: CURRENCY.USD,
+          amount,
         });
-      }
-    }).catch(console.error);
-  }
+
+        if (result.data) {
+          set({
+            qrstring: result.data.qr,
+            md5: result.data.md5,
+            sessionTime: 180,
+            expired: false,
+            transactionStatus: "pending", // Update status when QR is ready
+          });
+        }
+      })
+      .catch(console.error);
+  },
 }));

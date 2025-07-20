@@ -6,16 +6,14 @@ export { KhqrDialog, useKhqr };
 export type { TransactionStatus };
 
 export {
-//   UploadButton,
-//   UploadDropzone,
-//   Uploader,
-//   generateUploadButton,
-//   generateUploadDropzone,
-//   generateUploader,
-    VeluyButton,
-    generateVeluyButton
+  //   UploadButton,
+  //   UploadDropzone,
+  //   Uploader,
+  //   generateUploadButton,
+  //   generateUploadDropzone,
+  //   generateUploader,
+  VeluyButton,
+  generateVeluyButton,
 } from "./components";
 
-
 export type * from "./types";
-

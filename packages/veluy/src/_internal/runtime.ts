@@ -14,11 +14,7 @@ export const makeRuntime = (fetch: FetchEsque, config: unknown) => {
   );
 
   const layer = Layer.provide(
-    Layer.mergeAll(
-      withLogFormat,
-      withMinimalLogLevel,
-      fetchHttpClient,
-    ),
+    Layer.mergeAll(withLogFormat, withMinimalLogLevel, fetchHttpClient),
     Layer.setConfigProvider(configProvider(config)),
   );
   return ManagedRuntime.make(layer);

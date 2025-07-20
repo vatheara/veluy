@@ -1,29 +1,26 @@
-import type { StorybookConfig } from '@storybook/react-vite';
+import type { StorybookConfig } from "@storybook/react-vite";
 
-import path, { join, dirname } from "path"
+import path, { join, dirname } from "path";
 
 /**
-* This function is used to resolve the absolute path of a package.
-* It is needed in projects that use Yarn PnP or are set up within a monorepo.
-*/
+ * This function is used to resolve the absolute path of a package.
+ * It is needed in projects that use Yarn PnP or are set up within a monorepo.
+ */
 function getAbsolutePath(value: string): any {
-  return dirname(require.resolve(join(value, 'package.json')))
+  return dirname(require.resolve(join(value, "package.json")));
 }
 const config: StorybookConfig = {
-  "stories": [
-    "../src/**/*.mdx",
-    "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
+  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
+  addons: [
+    getAbsolutePath("@storybook/addon-essentials"),
+    getAbsolutePath("@chromatic-com/storybook"),
+    getAbsolutePath("@storybook/experimental-addon-test"),
   ],
-  "addons": [
-    getAbsolutePath('@storybook/addon-essentials'),
-    getAbsolutePath('@chromatic-com/storybook'),
-    getAbsolutePath("@storybook/experimental-addon-test")
-  ],
-  "framework": {
-    "name": getAbsolutePath('@storybook/react-vite'),
-    "options": {}
+  framework: {
+    name: getAbsolutePath("@storybook/react-vite"),
+    options: {},
   },
-  "viteFinal": (config) => {
+  viteFinal: (config) => {
     // Add custom Vite configuration
     return {
       ...config,
@@ -31,10 +28,10 @@ const config: StorybookConfig = {
         ...config.resolve,
         alias: {
           ...config.resolve?.alias,
-          '@': path.resolve(__dirname, '../src')
-        }
-      }
+          "@": path.resolve(__dirname, "../src"),
+        },
+      },
     };
-  }
+  },
 };
 export default config;

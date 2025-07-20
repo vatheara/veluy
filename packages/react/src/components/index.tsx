@@ -68,10 +68,10 @@ export type VeluyButtonProps<
   statusCheckInterval?: number;
 };
 
-/** 
+/**
  * A subset of the standard RequestInit properties needed by Veluy internally.
  * @see RequestInit from lib.dom.d.ts
-*/
+ */
 export interface RequestInitEsque {
   /**
    * Sets the request's body.
@@ -172,129 +172,142 @@ function useVeluyTransaction<
   const [isTransacting, setTransacting] = useState(false);
   const [error, setError] = useState<any>(null);
   const [currentHash, setCurrentHash] = useState<string | null>(null);
-  const [currentStatus, setCurrentStatus] = useState<TransactionStatus | null>(null);
-  
+  const [currentStatus, setCurrentStatus] = useState<TransactionStatus | null>(
+    null,
+  );
+
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const previousStatusRef = useRef<TransactionStatus | null>(null);
 
   // Status checking function - uses MD5 hash from QR code
-  const checkTransactionStatus = useCallback(async (md5Hash: string) => {
-    if (!md5Hash) return;
+  const checkTransactionStatus = useCallback(
+    async (md5Hash: string) => {
+      if (!md5Hash) return;
 
-    try {
-      // Resolve endpoint for status check
-      const resolvedEndpoint = typeof endpoint === 'function' 
-        ? endpoint({} as RouteRegistry<TRouter>) 
-        : endpoint;
-      
-      const baseUrl = opts?.url || '/api/veluy';
-      const url = `${baseUrl}/${String(resolvedEndpoint)}`;
-      
-      const fetchFn = opts?.fetch || globalThis.fetch;
-      const response = await fetchFn(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          md5Hash // Send MD5 hash from QR code for verification
-        }),
-      });
+      try {
+        // Resolve endpoint for status check
+        const resolvedEndpoint =
+          typeof endpoint === "function"
+            ? endpoint({} as RouteRegistry<TRouter>)
+            : endpoint;
 
-      if (!response.ok) {
-        console.warn(`Status check failed: ${response.statusText}`);
-        return;
-      }
+        const baseUrl = opts?.url || "/api/veluy";
+        const url = `${baseUrl}/${String(resolvedEndpoint)}`;
 
-      const backendResponse = await response.json();
-      
-      // Map backend response to frontend TransactionStatusResponse format
-      const statusResponse: TransactionStatusResponse = {
-        status: backendResponse.success ? 'completed' : 'failed',
-        hash: md5Hash,
-        message: backendResponse.success ? 'Transaction verified' : 'Transaction failed',
-        data: backendResponse.data,
-        progress: 100
-      };
-      
-      // Update current status
-      setCurrentStatus(statusResponse.status);
-      
-      // Call status change callback if status changed
-      if (previousStatusRef.current !== statusResponse.status) {
-        opts?.onStatusChange?.(statusResponse);
-        previousStatusRef.current = statusResponse.status;
+        const fetchFn = opts?.fetch || globalThis.fetch;
+        const response = await fetchFn(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            md5Hash, // Send MD5 hash from QR code for verification
+          }),
+        });
+
+        if (!response.ok) {
+          console.warn(`Status check failed: ${response.statusText}`);
+          return;
+        }
+
+        const backendResponse = await response.json();
+
+        // Map backend response to frontend TransactionStatusResponse format
+        const statusResponse: TransactionStatusResponse = {
+          status: backendResponse.success ? "completed" : "failed",
+          hash: md5Hash,
+          message: backendResponse.success
+            ? "Transaction verified"
+            : "Transaction failed",
+          data: backendResponse.data,
+          progress: 100,
+        };
+
+        // Update current status
+        setCurrentStatus(statusResponse.status);
+
+        // Call status change callback if status changed
+        if (previousStatusRef.current !== statusResponse.status) {
+          opts?.onStatusChange?.(statusResponse);
+          previousStatusRef.current = statusResponse.status;
+        }
+
+        // Handle final statuses
+        switch (statusResponse.status) {
+          case "completed":
+            // Stop polling and call success callback
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
+            setTransacting(false);
+            opts?.onVeluyComplete?.(statusResponse.data);
+            break;
+
+          case "failed":
+            // Stop polling and call error callback
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
+            setTransacting(false);
+            setError(new Error(statusResponse.message || "Transaction failed"));
+            opts?.onVeluyError?.(
+              new Error(statusResponse.message || "Transaction failed"),
+            );
+            break;
+
+          case "cancelled":
+            // Stop polling and call cancelled callback
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
+            setTransacting(false);
+            opts?.onVeluyCancelled?.(md5Hash);
+            break;
+
+          case "expired":
+            // Stop polling and call expired callback
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
+            setTransacting(false);
+            opts?.onVeluyExpired?.(md5Hash);
+            break;
+
+          case "pending":
+          case "processing":
+            // Continue polling for these statuses
+            break;
+        }
+      } catch (err) {
+        console.error("Status check error:", err);
       }
-      
-      // Handle final statuses
-      switch (statusResponse.status) {
-        case 'completed':
-          // Stop polling and call success callback
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
-          setTransacting(false);
-          opts?.onVeluyComplete?.(statusResponse.data);
-          break;
-          
-        case 'failed':
-          // Stop polling and call error callback
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
-          setTransacting(false);
-          setError(new Error(statusResponse.message || 'Transaction failed'));
-          opts?.onVeluyError?.(new Error(statusResponse.message || 'Transaction failed'));
-          break;
-          
-        case 'cancelled':
-          // Stop polling and call cancelled callback
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
-          setTransacting(false);
-          opts?.onVeluyCancelled?.(md5Hash);
-          break;
-          
-        case 'expired':
-          // Stop polling and call expired callback
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
-          setTransacting(false);
-          opts?.onVeluyExpired?.(md5Hash);
-          break;
-          
-        case 'pending':
-        case 'processing':
-          // Continue polling for these statuses
-          break;
-      }
-    } catch (err) {
-      console.error('Status check error:', err);
-    }
-  }, [opts, endpoint]);
+    },
+    [opts, endpoint],
+  );
 
   // Start status polling using MD5 hash from QR code
-  const startStatusPolling = useCallback((md5Hash: string) => {
-    // Clear any existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-    
-    // Set up new interval
-    const interval = opts?.statusCheckInterval || 5000; // Default 5 seconds
-    intervalRef.current = setInterval(() => {
+  const startStatusPolling = useCallback(
+    (md5Hash: string) => {
+      // Clear any existing interval
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
+      // Set up new interval
+      const interval = opts?.statusCheckInterval || 5000; // Default 5 seconds
+      intervalRef.current = setInterval(() => {
+        checkTransactionStatus(md5Hash);
+      }, interval);
+
+      // Also check immediately
       checkTransactionStatus(md5Hash);
-    }, interval);
-    
-    // Also check immediately
-    checkTransactionStatus(md5Hash);
-  }, [checkTransactionStatus, opts?.statusCheckInterval]);
+    },
+    [checkTransactionStatus, opts?.statusCheckInterval],
+  );
 
   // Stop status polling
   const stopStatusPolling = useCallback(() => {
@@ -311,37 +324,42 @@ function useVeluyTransaction<
     };
   }, [stopStatusPolling]);
 
-  const startTransaction = useCallback(async (input?: inferEndpointInput<TRouter[TEndpoint]>, md5Hash?: string) => {
-    setTransacting(true);
-    setError(null);
-    setCurrentStatus('pending');
-    previousStatusRef.current = null;
-    
-    try {
-      // Generate transaction hash for tracking
-      const hash = Math.random().toString(36).substring(2, 15);
-      setCurrentHash(hash);
-      
-      // Call onVeluyBegin callback
-      opts?.onVeluyBegin?.(hash);
-      
-      // If MD5 hash is provided (from QR code), start polling immediately
-      if (md5Hash) {
-        startStatusPolling(md5Hash);
-        return { hash, md5Hash, status: 'pending' };
+  const startTransaction = useCallback(
+    async (
+      input?: inferEndpointInput<TRouter[TEndpoint]>,
+      md5Hash?: string,
+    ) => {
+      setTransacting(true);
+      setError(null);
+      setCurrentStatus("pending");
+      previousStatusRef.current = null;
+
+      try {
+        // Generate transaction hash for tracking
+        const hash = Math.random().toString(36).substring(2, 15);
+        setCurrentHash(hash);
+
+        // Call onVeluyBegin callback
+        opts?.onVeluyBegin?.(hash);
+
+        // If MD5 hash is provided (from QR code), start polling immediately
+        if (md5Hash) {
+          startStatusPolling(md5Hash);
+          return { hash, md5Hash, status: "pending" };
+        }
+
+        // Otherwise, this would be for transaction initiation (not used in current flow)
+        // The actual transaction verification happens via QR code MD5 hash polling
+        return { hash, status: "pending" };
+      } catch (err) {
+        setError(err);
+        setTransacting(false);
+        opts?.onVeluyError?.(err);
+        throw err;
       }
-      
-      // Otherwise, this would be for transaction initiation (not used in current flow)
-      // The actual transaction verification happens via QR code MD5 hash polling
-      return { hash, status: 'pending' };
-      
-    } catch (err) {
-      setError(err);
-      setTransacting(false);
-      opts?.onVeluyError?.(err);
-      throw err;
-    }
-  }, [endpoint, opts, startStatusPolling]);
+    },
+    [endpoint, opts, startStatusPolling],
+  );
 
   const cancelTransaction = useCallback(() => {
     stopStatusPolling();
@@ -383,95 +401,103 @@ export function VeluyButton<
   // since the ErrorMessage messes it up otherwise
   const $props = props as unknown as VeluyButtonProps<TRouter, TEndpoint>;
 
-  const { 
-    setIsOpen, 
-    setTitle, 
-    setDescription, 
-    setTransactionHash, 
+  const {
+    setIsOpen,
+    setTitle,
+    setDescription,
+    setTransactionHash,
     setTransactionStatus,
     resetTransaction,
     generateQR,
     transactionStatus,
-    transactionHash
+    transactionHash,
   } = useKhqr();
-  
+
   // Create our own status checking function for MD5 polling
-  const checkTransactionStatus = useCallback(async (md5Hash: string) => {
-    if (!md5Hash) return;
+  const checkTransactionStatus = useCallback(
+    async (md5Hash: string) => {
+      if (!md5Hash) return;
 
-    try {
-      // Resolve endpoint for status check
-      const resolvedEndpoint = typeof $props.endpoint === 'function' 
-        ? $props.endpoint({} as RouteRegistry<TRouter>) 
-        : $props.endpoint;
-      
-      const baseUrl = $props.url || '/api/veluy';
-      const url = `${baseUrl}/${String(resolvedEndpoint)}`;
-      
-      const fetchFn = $props.fetch || globalThis.fetch;
-      const response = await fetchFn(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          md5Hash // Send MD5 hash from QR code for verification
-        }),
-      });
+      try {
+        // Resolve endpoint for status check
+        const resolvedEndpoint =
+          typeof $props.endpoint === "function"
+            ? $props.endpoint({} as RouteRegistry<TRouter>)
+            : $props.endpoint;
 
-      if (!response.ok) {
-        console.warn(`Status check failed: ${response.statusText}`);
-        return;
+        const baseUrl = $props.url || "/api/veluy";
+        const url = `${baseUrl}/${String(resolvedEndpoint)}`;
+
+        const fetchFn = $props.fetch || globalThis.fetch;
+        const response = await fetchFn(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            md5Hash, // Send MD5 hash from QR code for verification
+          }),
+        });
+
+        if (!response.ok) {
+          console.warn(`Status check failed: ${response.statusText}`);
+          return;
+        }
+
+        const backendResponse = await response.json();
+
+        // Map backend response to frontend TransactionStatusResponse format
+        const statusResponse: TransactionStatusResponse = {
+          status: backendResponse.success ? "completed" : "failed",
+          hash: md5Hash,
+          message: backendResponse.success
+            ? "Transaction verified"
+            : "Transaction failed",
+          data: backendResponse.data,
+          progress: 100,
+        };
+
+        // Update transaction status
+        setTransactionStatus(statusResponse.status);
+        $props.onStatusChange?.(statusResponse);
+
+        // Handle final statuses
+        switch (statusResponse.status) {
+          case "completed":
+            $props.onVeluyComplete?.(statusResponse.data);
+            break;
+          case "failed":
+            $props.onVeluyError?.(
+              new Error(statusResponse.message || "Transaction failed"),
+            );
+            break;
+        }
+      } catch (err) {
+        console.error("Status check error:", err);
+        setTransactionStatus("failed");
+        $props.onVeluyError?.(err as Error);
       }
-
-      const backendResponse = await response.json();
-      
-      // Map backend response to frontend TransactionStatusResponse format
-      const statusResponse: TransactionStatusResponse = {
-        status: backendResponse.success ? 'completed' : 'failed',
-        hash: md5Hash,
-        message: backendResponse.success ? 'Transaction verified' : 'Transaction failed',
-        data: backendResponse.data,
-        progress: 100
-      };
-      
-      // Update transaction status
-      setTransactionStatus(statusResponse.status);
-      $props.onStatusChange?.(statusResponse);
-      
-      // Handle final statuses
-      switch (statusResponse.status) {
-        case 'completed':
-          $props.onVeluyComplete?.(statusResponse.data);
-          break;
-        case 'failed':
-          $props.onVeluyError?.(new Error(statusResponse.message || 'Transaction failed'));
-          break;
-      }
-    } catch (err) {
-      console.error('Status check error:', err);
-      setTransactionStatus('failed');
-      $props.onVeluyError?.(err as Error);
-    }
-  }, [$props, setTransactionStatus]);
+    },
+    [$props, setTransactionStatus],
+  );
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isTransacting, setTransacting] = useState(false);
 
   // Update dialog based on status changes
   useEffect(() => {
-    if (!isTransacting && transactionStatus === 'idle') return;
+    if (!isTransacting && transactionStatus === "idle") return;
 
     switch (transactionStatus) {
-      case 'pending':
+      case "pending":
         setTitle("Transaction Pending");
         setDescription("Your transaction is waiting to be processed...");
         break;
-      case 'processing':
+      case "processing":
         setTitle("Processing Transaction");
         setDescription("Your transaction is being processed...");
         break;
-      case 'completed':
+      case "completed":
         setTitle("Transaction Complete");
         setDescription("Your transaction has been processed successfully!");
         setTransacting(false);
@@ -484,7 +510,7 @@ export function VeluyButton<
           resetTransaction();
         }, 2000);
         break;
-      case 'failed':
+      case "failed":
         setTitle("Transaction Failed");
         setDescription("An error occurred while processing your transaction.");
         setTransacting(false);
@@ -493,7 +519,7 @@ export function VeluyButton<
           intervalRef.current = null;
         }
         break;
-      case 'cancelled':
+      case "cancelled":
         setTitle("Transaction Cancelled");
         setDescription("Your transaction has been cancelled.");
         setTransacting(false);
@@ -506,7 +532,7 @@ export function VeluyButton<
           resetTransaction();
         }, 2000);
         break;
-      case 'expired':
+      case "expired":
         setTitle("Transaction Expired");
         setDescription("Your transaction has expired. Please try again.");
         setTransacting(false);
@@ -516,63 +542,87 @@ export function VeluyButton<
         }
         break;
     }
-  }, [transactionStatus, isTransacting, setTitle, setDescription, setIsOpen, resetTransaction]);
+  }, [
+    transactionStatus,
+    isTransacting,
+    setTitle,
+    setDescription,
+    setIsOpen,
+    resetTransaction,
+  ]);
 
   const handleTransaction = useCallback(async () => {
     try {
       // Reset any previous transaction state
       resetTransaction();
-      
+
       // Set up dialog
       setTitle("Initiating Transaction");
-      setDescription("Please wait while your transaction is being initiated...");
+      setDescription(
+        "Please wait while your transaction is being initiated...",
+      );
       setIsOpen(true);
-      
+
       // Generate QR code for payment
       generateQR();
 
       // Start transaction with input if provided (basic initialization)
-      const input = 'input' in $props ? $props.input : undefined;
+      const input = "input" in $props ? $props.input : undefined;
       const hash = Math.random().toString(36).substring(2, 15);
       setTransactionHash(hash);
-      setTransactionStatus('pending');
+      setTransactionStatus("pending");
       setTransacting(true);
       $props.onVeluyBegin?.(hash);
-      
     } catch (error) {
       // Update dialog on error
       setTitle("Transaction Failed");
-      setDescription("An error occurred while initiating your transaction. Please try again.");
-      setTransactionStatus('failed');
-      console.error('Transaction error:', error);
+      setDescription(
+        "An error occurred while initiating your transaction. Please try again.",
+      );
+      setTransactionStatus("failed");
+      console.error("Transaction error:", error);
     }
-  }, [$props, setIsOpen, setTitle, setDescription, resetTransaction, generateQR, setTransactionHash, setTransactionStatus]);
+  }, [
+    $props,
+    setIsOpen,
+    setTitle,
+    setDescription,
+    resetTransaction,
+    generateQR,
+    setTransactionHash,
+    setTransactionStatus,
+  ]);
 
   // Watch for MD5 hash from QR code and start polling (only once when MD5 becomes available)
   const { md5 } = useKhqr();
   const hasStartedPolling = useRef(false);
-  
+
   useEffect(() => {
-    if (md5 && transactionStatus === 'pending' && !hasStartedPolling.current) {
+    if (md5 && transactionStatus === "pending" && !hasStartedPolling.current) {
       hasStartedPolling.current = true;
-      
+
       // Start status polling with the MD5 hash from QR code
       const interval = $props.statusCheckInterval || 5000;
       const pollInterval = setInterval(() => {
         checkTransactionStatus(md5);
       }, interval);
-      
+
       // Store interval reference for cleanup
       intervalRef.current = pollInterval;
-      
+
       // Check immediately
       checkTransactionStatus(md5);
     }
-  }, [md5, transactionStatus, checkTransactionStatus, $props.statusCheckInterval]);
+  }, [
+    md5,
+    transactionStatus,
+    checkTransactionStatus,
+    $props.statusCheckInterval,
+  ]);
 
   // Reset polling flag when transaction is reset
   useEffect(() => {
-    if (transactionStatus === 'idle') {
+    if (transactionStatus === "idle") {
       hasStartedPolling.current = false;
     }
   }, [transactionStatus]);
@@ -584,27 +634,25 @@ export function VeluyButton<
       intervalRef.current = null;
     }
     setTransacting(false);
-    setTransactionStatus('cancelled');
+    setTransactionStatus("cancelled");
     setIsOpen(false);
     resetTransaction();
   }, [setIsOpen, setTransactionStatus, resetTransaction]);
 
   return (
     <>
-      <Button 
+      <Button
         onClick={handleTransaction}
         disabled={isTransacting || $props.disabled}
         className={$props.className}
       >
-        {isTransacting ? `${transactionStatus || 'Processing'}...` : ($props.content?.buttonText || "Start Transaction")}
+        {isTransacting
+          ? `${transactionStatus || "Processing"}...`
+          : $props.content?.buttonText || "Start Transaction"}
       </Button>
-      
+
       {isTransacting && (
-        <Button 
-          onClick={handleCancel}
-          variant="outline"
-          className="ml-2"
-        >
+        <Button onClick={handleCancel} variant="outline" className="ml-2">
           Cancel
         </Button>
       )}
@@ -632,5 +680,3 @@ export const generateVeluyButton = <TRouter extends TransactionRouter>(
   );
   return TypedButton;
 };
-
-

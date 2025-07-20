@@ -1,6 +1,13 @@
 import * as React from "react";
 import { useKhqr } from "@/hook";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@repo/ui/components/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@repo/ui/components/dialog";
 import { Button } from "@repo/ui/components/button";
 import { QRCodeSVG } from "qrcode.react";
 import KhqrIcon from "@/assets/bakong/KHQR-Logo.png";
@@ -8,16 +15,15 @@ import { useState, useEffect, useRef } from "react";
 import LoadingSpinner from "./loading-spinner";
 import { FiClock } from "react-icons/fi";
 
-
 export const KhqrDialog = () => {
-  const { 
-    isOpen, 
-    title, 
-    description,  
-    setIsOpen, 
-    sessionTime, 
-    expired, 
-    setSessionTime, 
+  const {
+    isOpen,
+    title,
+    description,
+    setIsOpen,
+    sessionTime,
+    expired,
+    setSessionTime,
     setExpired,
     transactionStatus,
     qrstring,
@@ -25,7 +31,7 @@ export const KhqrDialog = () => {
     amount,
     merchantName,
     generateQR,
-    resetTransaction
+    resetTransaction,
   } = useKhqr();
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -36,7 +42,7 @@ export const KhqrDialog = () => {
 
   // Notify parent component when MD5 hash is available for polling
   useEffect(() => {
-    if (md5 && transactionStatus === 'pending') {
+    if (md5 && transactionStatus === "pending") {
       // The VeluyButton component will handle the actual status polling
       // This is just for logging/debugging
       console.log("QR code generated with MD5 hash:", md5);
@@ -62,7 +68,7 @@ export const KhqrDialog = () => {
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        {expired || transactionStatus === 'expired' ? (
+        {expired || transactionStatus === "expired" ? (
           <div className="flex flex-col items-center justify-center gap-2">
             <FiClock size={64} />
             <div>Session Expired</div>
@@ -71,7 +77,7 @@ export const KhqrDialog = () => {
             </div>
             <Button onClick={handleTryAgain}>Try Again</Button>
           </div>
-        ) : transactionStatus === 'completed' ? (
+        ) : transactionStatus === "completed" ? (
           <div className="flex flex-col items-center justify-center gap-2">
             <div className="text-green-600 text-2xl">✓</div>
             <div>Payment Successful!</div>
@@ -79,7 +85,7 @@ export const KhqrDialog = () => {
               Your transaction has been completed successfully.
             </div>
           </div>
-        ) : transactionStatus === 'failed' ? (
+        ) : transactionStatus === "failed" ? (
           <div className="flex flex-col items-center justify-center gap-2">
             <div className="text-red-600 text-2xl">✗</div>
             <div>Payment Failed</div>
@@ -92,7 +98,7 @@ export const KhqrDialog = () => {
           <div className="flex flex-col gap-3">
             <div className="flex justify-between">
               <div>${amount} USD</div>
-              {transactionStatus === 'pending' && <Timer />}
+              {transactionStatus === "pending" && <Timer />}
             </div>
             <div className="flex items-center justify-center">
               <div

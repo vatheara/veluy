@@ -11,10 +11,7 @@ import type {
 } from "@veluy/shared";
 
 import type { JsonParser } from "./parser";
-import type {
-  NewPresignedUrl,
-  UploadActionPayload,
-} from "./shared-schemas";
+import type { NewPresignedUrl, UploadActionPayload } from "./shared-schemas";
 
 export type UTRegionAlias =
   | "bom1"
@@ -153,7 +150,10 @@ export interface VeluyBuilder<TParams extends AnyParams> {
       Simplify<
         TParams["_metadata"] extends UnsetMarker
           ? undefined
-          : Omit<TParams["_metadata"], typeof UTTransactionData | typeof UTRegion>
+          : Omit<
+              TParams["_metadata"],
+              typeof UTTransactionData | typeof UTRegion
+            >
       >,
       TOutput,
       TParams["_adapterFnArgs"]

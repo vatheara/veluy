@@ -1,4 +1,3 @@
-
 export type JsonValue = string | number | boolean | null | undefined;
 export type JsonObject = { [key: string]: JsonValue | JsonObject | JsonArray };
 export type JsonArray = (JsonValue | JsonObject)[];
@@ -198,7 +197,6 @@ export type RouteOptions = {
   getFileHashParts?: ExtractHashPartsFn;
 };
 
-
 export type ExpandedRouteConfig = {
   [key in string]?: key extends `image${string}`
     ? RouteConfig<ImageProperties>
@@ -209,4 +207,3 @@ export type EndpointMetadata = {
   slug: string;
   config: ExpandedRouteConfig;
 }[];
-

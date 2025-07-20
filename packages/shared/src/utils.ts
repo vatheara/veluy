@@ -18,14 +18,12 @@ import type {
   TimeShort,
 } from "./types";
 
-
 /** typesafe Object.keys */
 export function objectKeys<T extends Record<string, unknown>>(
   obj: T,
 ): (keyof T)[] {
   return Object.keys(obj) as (keyof T)[];
 }
-
 
 export function semverLite(required: string, toCheck: string) {
   // Pull out numbers from strings like `6.0.0`, `^6.4`, `~6.4.0`

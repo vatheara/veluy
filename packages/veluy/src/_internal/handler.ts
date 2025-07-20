@@ -49,22 +49,22 @@ export const makeAdapterHandler = <
   makeAdapterArgs: (...args: Args) => Effect.Effect<AdapterArgs>,
   toRequest: (...args: Args) => Effect.Effect<Request>,
   opts: RouteHandlerOptions<TransactionRouter>,
-  beAdapter?: string
+  beAdapter?: string,
 ): ((...args: Args) => Promise<Response>) => {
   const managed = makeRuntime(
     opts.config?.fetch as typeof globalThis.fetch,
-    opts.config
+    opts.config,
   );
   const handle = Effect.promise(() =>
-    managed.runtime().then(HttpApp.toWebHandlerRuntime)
+    managed.runtime().then(HttpApp.toWebHandlerRuntime),
   );
 
   const app = (...args: Args) =>
     Effect.map(
       Effect.promise(() =>
-        managed.runPromise(createRequestHandler(opts, beAdapter ?? "custom"))
+        managed.runPromise(createRequestHandler(opts, beAdapter ?? "custom")),
       ),
-      Effect.provideServiceEffect(AdapterArguments, makeAdapterArgs(...args))
+      Effect.provideServiceEffect(AdapterArguments, makeAdapterArgs(...args)),
     );
 
   return async (...args: Args) => {
@@ -72,7 +72,7 @@ export const makeAdapterHandler = <
       Effect.ap(app(...args)),
       Effect.ap(toRequest(...args)),
       Effect.withLogSpan("requestHandler"),
-      managed.runPromise
+      managed.runPromise,
     );
 
     return result;
@@ -83,7 +83,7 @@ export const createRequestHandler = <
   TRouter extends Record<string, AnyTransactionRoute>,
 >(
   opts: RouteHandlerOptions<TRouter>,
-  beAdapter: string
+  beAdapter: string,
 ) =>
   Effect.gen(function* () {
     const isDevelopment = yield* IsDevelopment;
@@ -116,7 +116,7 @@ export const createRequestHandler = <
       const { slug } = yield* HttpRouter.schemaParams(
         Schema.Struct({
           slug: Schema.String,
-        })
+        }),
       );
 
       const route = opts.router[slug];
@@ -131,7 +131,7 @@ export const createRequestHandler = <
 
       // Safely parse JSON body with error handling
       const body = yield* request.json.pipe(
-        Effect.catchAll(() => Effect.succeed(null))
+        Effect.catchAll(() => Effect.succeed(null)),
       );
 
       yield* Effect.log("body", body);
@@ -142,7 +142,7 @@ export const createRequestHandler = <
       // Validate MD5 hash format (32 hex characters)
       if (!/^[a-f0-9]{32}$/i.test(md5)) {
         yield* Effect.logError("Invalid MD5 hash format").pipe(
-          Effect.annotateLogs("receivedHash", md5)
+          Effect.annotateLogs("receivedHash", md5),
         );
         return yield* HttpServerResponse.json(
           {
@@ -151,14 +151,14 @@ export const createRequestHandler = <
             expected:
               "32-character hexadecimal string (e.g., 'd41d8cd98f00b204e9800998ecf8427e')",
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       // Mock banking API call - replace with actual banking API integration
       const client = yield* HttpClient.HttpClient;
       const bankingResponse = yield* HttpClientRequest.post(
-        "http://localhost:9000/v1/check_transaction_by_md5"
+        "http://localhost:9000/v1/check_transaction_by_md5",
       )
         .pipe(
           HttpClientRequest.setHeader("Authorization", "Bearer 123456789"),
@@ -166,7 +166,7 @@ export const createRequestHandler = <
             md5: md5,
           }),
           Effect.flatMap(client.execute),
-          Effect.flatMap((res) => res.json)
+          Effect.flatMap((res) => res.json),
         )
         .pipe(Effect.provide(FetchHttpClient.layer));
 
@@ -177,7 +177,7 @@ export const createRequestHandler = <
       const fiber = yield* Effect.gen(function* () {
         const adapterArgs = yield* AdapterArguments;
         const runMiddleware = yield* Effect.tryPromise({
-          try: async () => 
+          try: async () =>
             route.middleware({
               input: { md5 },
               ...adapterArgs,
@@ -208,9 +208,7 @@ export const createRequestHandler = <
                 "Failed to run onUploadComplete. You probably shouldn't be throwing errors here.",
               cause: error,
             }),
-        }).pipe(
-          Effect.tap(() => Effect.log("onTransactionComplete done"))
-        );
+        }).pipe(Effect.tap(() => Effect.log("onTransactionComplete done")));
       }).pipe(Effect.forkDaemon);
 
       yield* fiber.await;
@@ -220,7 +218,7 @@ export const createRequestHandler = <
           success: false,
           error: "Transaction processing failed",
         },
-        { status: 500 }
+        { status: 500 },
       );
     }).pipe(
       Effect.catchTags({
@@ -232,26 +230,26 @@ export const createRequestHandler = <
                 message: "Invalid input",
                 cause: e.message,
               }),
-              opts.router
+              opts.router,
             ),
-            { status: 400 }
+            { status: 400 },
           ),
         VeluyError: (e) =>
           HttpServerResponse.json(formatError(e, opts.router), {
             status: getStatusCodeFromError(e),
           }),
       }),
-      Effect.withLogSpan("POST_handler")
+      Effect.withLogSpan("POST_handler"),
     );
 
     const appendResponseHeaders = Effect.map(
-      HttpServerResponse.setHeader("x-veluy-version", pkgJson.version)
+      HttpServerResponse.setHeader("x-veluy-version", pkgJson.version),
     );
 
     return HttpRouter.empty.pipe(
       HttpRouter.get("*", GET),
       HttpRouter.post("*", POST),
-      HttpRouter.use(appendResponseHeaders)
+      HttpRouter.use(appendResponseHeaders),
     );
   }).pipe(Effect.withLogSpan("createRequestHandler"));
 
@@ -259,7 +257,7 @@ const handleCheckTransaction = (md5Hash: string) => {
   return Effect.gen(function* () {
     const request = yield* HttpServerRequest.HttpServerRequest;
     const body = yield* request.json.pipe(
-      Effect.catchAll(() => Effect.succeed(null))
+      Effect.catchAll(() => Effect.succeed(null)),
     );
   });
 };

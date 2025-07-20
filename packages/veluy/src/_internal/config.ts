@@ -3,10 +3,7 @@ import * as ConfigProvider from "effect/ConfigProvider";
 import * as Effect from "effect/Effect";
 import * as S from "effect/Schema";
 
-import {
-  filterDefinedObjectValues,
-  VeluyError,
-} from "@veluy/shared";
+import { filterDefinedObjectValues, VeluyError } from "@veluy/shared";
 
 import { UploadThingToken } from "./shared-schemas";
 

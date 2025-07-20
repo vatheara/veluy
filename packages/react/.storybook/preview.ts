@@ -1,4 +1,4 @@
-import type { Preview } from '@storybook/react'
+import type { Preview } from "@storybook/react";
 // import "../../ui/src/styles/globals.css";
 import "@repo/ui/globals.css";
 
@@ -7,8 +7,8 @@ const preview: Preview = {
     actions: { argTypesRegex: "^on[A-Z].*" },
     controls: {
       matchers: {
-       color: /(background|color)$/i,
-       date: /Date$/,
+        color: /(background|color)$/i,
+        date: /Date$/,
       },
     },
   },

@@ -1,15 +1,15 @@
 import * as Arr from "effect/Array";
 import * as Micro from "effect/Micro";
 import type {
-    TransactionRouter,
-    GenerateTransactionCheckerOptions,
-    EndpointArg,
-    RouteRegistry
-} from "./types"
-import { createIdentityProxy } from "@veluy/shared"
+  TransactionRouter,
+  GenerateTransactionCheckerOptions,
+  EndpointArg,
+  RouteRegistry,
+} from "./types";
+import { createIdentityProxy } from "@veluy/shared";
 
 export const genService = <TRouter extends TransactionRouter>(
-    initOpts?: GenerateTransactionCheckerOptions,
+  initOpts?: GenerateTransactionCheckerOptions,
 ) => {
-    const routeRegistry = createIdentityProxy<RouteRegistry<TRouter>>();
+  const routeRegistry = createIdentityProxy<RouteRegistry<TRouter>>();
 };

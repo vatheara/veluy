@@ -2,11 +2,7 @@ import { Array, Micro, Predicate } from "effect";
 import type { LazyArg } from "effect/Function";
 
 import { fetchEff } from "@veluy/shared";
-import type {
-  FetchContext,
-  FetchError,
-  MaybePromise,
-} from "@veluy/shared";
+import type { FetchContext, FetchError, MaybePromise } from "@veluy/shared";
 
 import { version } from "../../package.json";
 import type {

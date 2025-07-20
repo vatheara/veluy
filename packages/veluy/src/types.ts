@@ -10,11 +10,7 @@ import type {
 import type { LogFormat } from "./_internal/logger";
 import type { AnyTransactionRoute, TransactionRoute } from "./_internal/types";
 
-
-export type {
-  EndpointMetadata,
-  ExpandedRouteConfig,
-} from "@veluy/shared";
+export type { EndpointMetadata, ExpandedRouteConfig } from "@veluy/shared";
 
 export type { UTRegionAlias } from "./_internal/types";
 
@@ -82,7 +78,9 @@ export type RouteHandlerOptions<TRouter extends TransactionRouter> = {
   config?: RouteHandlerConfig;
 };
 
-export type CheckTransactionOptions<TTransactionRoute extends AnyTransactionRoute> = {
+export type CheckTransactionOptions<
+  TTransactionRoute extends AnyTransactionRoute,
+> = {
   /**
    * The MD5 hash to verify
    */
@@ -133,7 +131,9 @@ export type CheckTransactionOptions<TTransactionRoute extends AnyTransactionRout
   { input: inferEndpointInput<TTransactionRoute> }
 >;
 
-export type CreateTransactionCheckOptions<TTransactionRoute extends AnyTransactionRoute> = {
+export type CreateTransactionCheckOptions<
+  TTransactionRoute extends AnyTransactionRoute,
+> = {
   /**
    * The MD5 hash to verify
    */
