@@ -12,7 +12,7 @@ const f = createVeluy({
 // TransactionRouter for your app, can contain multiple TransactionRoutes
 export const ourTransactionRouter = {
     // Define as many TransactionRoutes as you like, each with a unique routeSlug
-    transaction: f({ any:"any" })
+    monthlySub: f({ any:"any" })
       // Set permissions and file types for this FileRoute
       .middleware(async () => {
         // This code runs on your server before checking the transaction
@@ -26,6 +26,20 @@ export const ourTransactionRouter = {
         return { transactionBy: metadata.userId };
       })
       ,
+    yearlySub: f({ any:"any" })
+      // Set permissions and file types for this FileRoute
+      .middleware(async () => {
+        // This code runs on your server before checking the transaction
+        return { userId: "test" };
+      })
+      .onTransactionError((e)=>console.log("$$$$$$$$$$$$$$error",e))
+      .onTransactionComplete(async ({ metadata, bankingResponse}) => {
+        // This code RUNS ON YOUR SERVER after checking the transaction
+        console.log("Transaction complete for userId:", metadata.userId);
+        console.log("banking response ", bankingResponse)
+        // !!! Whatever is returned here is sent to the clientside `onTransactionComplete` callback
+        return { transactionBy: metadata.userId };
+      })
   } satisfies TransactionRouter;
 
 export type OurTransactionRouter = typeof ourTransactionRouter;

@@ -8,6 +8,12 @@
       "@veluy/react": ["packages/react/src"],
       "@veluy/react/*": ["packages/react/src/*"],
       "veluy/*": ["packages/veluy/src/*"]
-    }
+    },
+    "plugins": [
+      {
+        "name": "@effect/language-service",
+        "namespaceImportPackages":["effect"]
+      }
+    ]
   }
 }

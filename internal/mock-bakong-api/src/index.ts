@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
 import { HTTPException } from 'hono/http-exception'
 
@@ -67,6 +68,8 @@ const validAccounts = ['user@bank', 'developer@cmcb', 'developer@devb']
 const mockToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.TCYt5XsITJX1CxPCT8kABxVN2fDUFHXvuKOFLGCHSfU'
 
 const app = new Hono()
+
+app.use(logger())
 
 // Enable CORS
 app.use('/*', cors())

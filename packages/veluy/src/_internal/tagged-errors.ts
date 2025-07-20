@@ -92,8 +92,28 @@ export class BadRequestError<T = unknown>
   }
 }
 
-export class UploadPausedError
+export class VeluyPausedError
   extends /** #__PURE__ */ Micro.TaggedError("UploadAborted") {}
 
-export class UploadAbortedError
+export class VeluyAbortedError
   extends /** #__PURE__ */ Micro.TaggedError("UploadAborted") {}
+
+
+/**
+ * =============================================================================
+ * ======================== Bakong 12 Possible Error ============================
+ * =============================================================================
+ */
+
+export class BakongTransactionNotFoundError extends Micro.TaggedError("BakongTransactionNotFoundError") {}
+export class BakongNotSupportStaticQRCodeError extends Micro.TaggedError("BakongNotSupportStaticQRCodeError") {}
+export class BakongTransactionFailedError extends Micro.TaggedError("BakongTransactionFailedError") {}
+export class BakongRequestDeeplinkError extends Micro.TaggedError("BakongRequestDeeplinkError") {}
+export class BakongMissingRequiredFieldError extends Micro.TaggedError("BakongMissingRequiredFieldError") {}
+export class BakongUnauthorizedError extends Micro.TaggedError("BakongUnauthorizedError") {}
+export class BakongEmailServerDownError extends Micro.TaggedError("BakongEmailServerDownError") {}
+export class BakongEmailRegisterError extends Micro.TaggedError("BakongEmailRegisterError") {}
+export class BakongCannotConnectToServerError extends Micro.TaggedError("BakongCannotConnectToServerError") {}
+export class BakongNotRegisteredError extends Micro.TaggedError("BakongNotRegisteredError") {}
+export class BakongAccountIdNotFoundError extends Micro.TaggedError("BakongAccountIdNotFoundError") {}
+export class BakongAccountIdInvalidError extends Micro.TaggedError("BakongAccountIdInvalidError") {}

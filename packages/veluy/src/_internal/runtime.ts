@@ -1,5 +1,4 @@
-import { FetchHttpClient, Headers } from "@effect/platform";
-import * as FiberRef from "effect/FiberRef";
+import { FetchHttpClient } from "@effect/platform";
 import * as Layer from "effect/Layer";
 import * as ManagedRuntime from "effect/ManagedRuntime";
 
@@ -14,18 +13,11 @@ export const makeRuntime = (fetch: FetchEsque, config: unknown) => {
     Layer.succeed(FetchHttpClient.Fetch, fetch as typeof globalThis.fetch),
   );
 
-  const withRedactedHeaders = Layer.effectDiscard(
-    FiberRef.update(Headers.currentRedactedNames, (_) =>
-      _.concat(["x-uploadthing-api-key"]),
-    ),
-  );
-
   const layer = Layer.provide(
     Layer.mergeAll(
       withLogFormat,
       withMinimalLogLevel,
       fetchHttpClient,
-      withRedactedHeaders,
     ),
     Layer.setConfigProvider(configProvider(config)),
   );

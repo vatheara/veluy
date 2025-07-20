@@ -147,3 +147,7 @@ export class UploadActionPayload extends S.Class<UploadActionPayload>(
   files: S.Array(FileUploadData),
   input: S.Unknown as S.Schema<Json>,
 }) {}
+
+export const CheckTransactionMD5Payload = S.Struct({
+  md5: S.String,
+});

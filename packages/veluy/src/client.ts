@@ -8,8 +8,8 @@ import type {
 } from "./types"
 import { createIdentityProxy } from "@veluy/shared"
 
-export const genUploader = <TRouter extends TransactionRouter>(
+export const genService = <TRouter extends TransactionRouter>(
     initOpts?: GenerateTransactionCheckerOptions,
 ) => {
-    
+    const routeRegistry = createIdentityProxy<RouteRegistry<TRouter>>();
 };
