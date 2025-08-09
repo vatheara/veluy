@@ -1,58 +1,60 @@
 {
-  "name": "veluy",
-  "version": "1.0.0-alpha.1",
-  "type": "module",
-  "sideEffects": false,
-  "engines": {
-    "node": ">=18.13.0"
-  },
-  "license": "MIT",
-  "exports": {
-    "./package.json": "./package.json",
-    "./next": {
-      "import": {
-        "types": "./next/index.d.ts",
-        "default": "./next/index.js"
-      },
-      "require": {
-        "types": "./next/index.d.cts",
-        "default": "./next/index.cjs"
-      }
+    "name": "veluy",
+    "version": "1.0.0-alpha.1",
+    "type": "module",
+    "sideEffects": false,
+    "engines": {
+        "node": ">=18.13.0"
     },
-    "./types": {
-      "types": "./types/index.d.ts",
-      "default": "./types/index.js"
+    "license": "MIT",
+    "exports": {
+        "./package.json": "./package.json",
+        "./next": {
+            "import": {
+                "types": "./next/index.d.ts",
+                "default": "./next/index.js"
+            },
+            "require": {
+                "types": "./next/index.d.cts",
+                "default": "./next/index.cjs"
+            }
+        },
+        "./types": {
+            "types": "./types/index.d.ts",
+            "default": "./types/index.js"
+        }
+    },
+    "files": [
+        "dist",
+        "next",
+        "types"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build": "NODE_OPTIONS='--max_old_space_size=16384' bunchee",
+        "dev": "NODE_OPTIONS='--max_old_space_size=16384' bunchee --no-clean",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "@effect/platform": "^0.84.3",
+        "@veluy/shared": "workspace:*",
+        "effect": "3.14.21"
+    },
+    "devDependencies": {
+        "@types/react": "19.1.2",
+        "@veluy/tsconfig": "workspace:*",
+        "bunchee": "6.2.0",
+        "eslint": "9.25.1",
+        "next": "15.3.1",
+        "typescript": "5.8.3",
+        "vitest": "^3.1.3"
+    },
+    "peerDependenciesMeta": {
+        "next": {
+            "optional": true
+        }
     }
-  },
-  "files": [
-    "dist",
-    "next",
-    "types"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "scripts": {
-    "build": "NODE_OPTIONS='--max_old_space_size=16384' bunchee",
-    "dev": "NODE_OPTIONS='--max_old_space_size=16384' bunchee --no-clean",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@effect/platform": "^0.84.3",
-    "@veluy/shared": "workspace:*",
-    "effect": "3.14.21"
-  },
-  "devDependencies": {
-    "@types/react": "19.1.2",
-    "@veluy/tsconfig": "workspace:*",
-    "bunchee": "6.2.0",
-    "eslint": "9.25.1",
-    "next": "15.3.1",
-    "typescript": "5.8.3"
-  },
-  "peerDependenciesMeta": {
-    "next": {
-      "optional": true
-    }
-  }
 }

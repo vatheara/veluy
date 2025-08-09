@@ -12,9 +12,10 @@ import { VeluyError, getStatusCodeFromError } from "@veluy/shared";
 import { formatError } from "./error-formatter";
 import {
     BakongResponse,
-    createErrorResponse,
-    errorResponse,
+    bakongError,
+    failBakong,
     KHQR_ERROR_CODES,
+    KHQR_ERROR_MESSAGES,
     TransactionVerificationData,
 } from "./khqr-response";
 
@@ -198,9 +199,11 @@ export const createRequestHandler = <
                     Effect.annotateLogs("receivedBody", body)
                 );
                 return yield* HttpServerResponse.json(
-                    createErrorResponse(
-                        KHQR_ERROR_CODES.BAKONG_ACCOUNT_ID_NULL,
-                        "Missing md5Hash in request body"
+                    bakongError(
+                        KHQR_ERROR_CODES.MISSING_REQUIRED_FIELDS,
+                        KHQR_ERROR_MESSAGES[
+                            KHQR_ERROR_CODES.MISSING_REQUIRED_FIELDS
+                        ]
                     ),
                     { status: 400 }
                 );
@@ -214,9 +217,11 @@ export const createRequestHandler = <
                     Effect.annotateLogs("receivedHash", md5Hash)
                 );
                 return yield* HttpServerResponse.json(
-                    createErrorResponse(
-                        KHQR_ERROR_CODES.KHQR_INVALID,
-                        "Invalid MD5 hash format. Expected 32-character hexadecimal string"
+                    bakongError(
+                        KHQR_ERROR_CODES.MISSING_REQUIRED_FIELDS,
+                        KHQR_ERROR_MESSAGES[
+                            KHQR_ERROR_CODES.MISSING_REQUIRED_FIELDS
+                        ]
                     ),
                     { status: 400 }
                 );
@@ -290,7 +295,10 @@ export const createRequestHandler = <
                     route.onTransactionError({
                         error: new VeluyError({
                             code: "INTERNAL_SERVER_ERROR",
-                            message: "Transaction processing failed",
+                            message:
+                                KHQR_ERROR_MESSAGES[
+                                    KHQR_ERROR_CODES.TRANSACTION_FAILED
+                                ],
                         }),
                         transactionId: `tx_${Date.now()}`,
                         md5Hash,
@@ -298,9 +306,11 @@ export const createRequestHandler = <
                     });
 
                     return yield* HttpServerResponse.json(
-                        createErrorResponse(
-                            KHQR_ERROR_CODES.INTERNAL_SERVER_ERROR,
-                            "Transaction processing failed"
+                        bakongError(
+                            KHQR_ERROR_CODES.TRANSACTION_FAILED,
+                            KHQR_ERROR_MESSAGES[
+                                KHQR_ERROR_CODES.TRANSACTION_FAILED
+                            ]
                         ),
                         { status: 500 }
                     );
@@ -330,9 +340,9 @@ export const createRequestHandler = <
             Effect.catchAll((e) => {
                 // Handle all errors with Bakong response format
                 return HttpServerResponse.json(
-                    createErrorResponse(
-                        KHQR_ERROR_CODES.INTERNAL_SERVER_ERROR,
-                        "An unexpected error occurred"
+                    bakongError(
+                        KHQR_ERROR_CODES.TRANSACTION_FAILED,
+                        KHQR_ERROR_MESSAGES[KHQR_ERROR_CODES.TRANSACTION_FAILED]
                     ),
                     { status: 500 }
                 );
@@ -369,9 +379,9 @@ const handleCheckTransaction = (
 
             return verificationData;
         } catch (error) {
-            return yield* errorResponse(
-                KHQR_ERROR_CODES.BAKONG_API_UNREACHABLE,
-                "Failed to verify transaction"
+            return yield* failBakong(
+                KHQR_ERROR_CODES.CANNOT_CONNECT_TO_SERVER,
+                KHQR_ERROR_MESSAGES[KHQR_ERROR_CODES.CANNOT_CONNECT_TO_SERVER]
             );
         }
     });
@@ -381,16 +391,16 @@ const validateMD5Hash = (
     hash: string
 ): Effect.Effect<string, BakongResponse> => {
     if (!hash) {
-        return errorResponse(
-            KHQR_ERROR_CODES.BAKONG_ACCOUNT_ID_NULL,
-            "MD5 hash cannot be null or empty"
+        return failBakong(
+            KHQR_ERROR_CODES.MISSING_REQUIRED_FIELDS,
+            KHQR_ERROR_MESSAGES[KHQR_ERROR_CODES.MISSING_REQUIRED_FIELDS]
         );
     }
 
     if (!/^[a-f0-9]{32}$/i.test(hash)) {
-        return errorResponse(
-            KHQR_ERROR_CODES.KHQR_INVALID,
-            "Invalid MD5 hash format. Expected 32-character hexadecimal string"
+        return failBakong(
+            KHQR_ERROR_CODES.MISSING_REQUIRED_FIELDS,
+            KHQR_ERROR_MESSAGES[KHQR_ERROR_CODES.MISSING_REQUIRED_FIELDS]
         );
     }
 
