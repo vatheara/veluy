@@ -1,6 +1,10 @@
 packages:
-  - "apps/*"
-  - "packages/*"
-  - "examples/*"
-  - "tooling/*"
-  - "internal/*"
+  - apps/*
+  - packages/*
+  - examples/*
+  - tooling/*
+  - internal/*
+
+ignoredBuiltDependencies:
+  - better-sqlite3
+  - esbuild
