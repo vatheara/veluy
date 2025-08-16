@@ -123,17 +123,11 @@ export const createRequestHandler = <
         const POST = Effect.gen(function* () {
             const request = yield* HttpServerRequest.HttpServerRequest;
 
-            const { slug } = yield* HttpRouter.schemaParams(
-                Schema.Struct({
-                    slug: Schema.String,
-                })
-            );
+            // Use the first configured route by default (no slug required)
+            const routeKeyToUse = Object.keys(opts.router)[0];
 
-            yield* Effect.log(slug);
-            const isValidRoute = opts.router[slug];
-            Effect.log(isValidRoute);
-            if (!isValidRoute) {
-                const msg = `No route found for slug ${slug}`;
+            if (!routeKeyToUse) {
+                const msg = "No routes configured";
                 yield* Effect.logError(msg);
                 return yield* new VeluyError({
                     code: "NOT_FOUND",
@@ -151,7 +145,7 @@ export const createRequestHandler = <
 
             if (!isTransactionVerification) {
                 // Handle non-transaction requests with original format
-                const routeKey = Object.keys(opts.router)[0];
+                const routeKey = routeKeyToUse;
                 if (routeKey) {
                     const route = opts.router[routeKey];
                     const adapterArgs = yield* AdapterArguments.pipe(
@@ -159,11 +153,15 @@ export const createRequestHandler = <
                     );
 
                     try {
-                        // Execute middleware for general requests
-                        const metadata = route.middleware({
-                            input: body || {},
-                            ...adapterArgs,
-                        });
+                        // Execute middleware for general requests (sync/async)
+                        const metadata = yield* Effect.promise(() =>
+                            Promise.resolve(
+                                route.middleware({
+                                    input: body || {},
+                                    ...adapterArgs,
+                                })
+                            )
+                        );
 
                         return yield* HttpServerResponse.json({
                             message: "Veluy endpoint ready",
@@ -228,12 +226,16 @@ export const createRequestHandler = <
             }
 
             // Use the new transaction verification system
-            const verificationResult = yield* handleCheckTransaction(
-                md5Hash
-            ).pipe(Effect.either);
+            const verificationResult = yield* handleCheckTransaction(md5Hash, {
+                bankingApiUrl: opts.config?.bankingApiUrl,
+                verifyEndpoint: (opts.config as any)?.verifyEndpoint,
+                verifyMethod: (opts.config as any)?.verifyMethod,
+                token: opts.config?.token,
+                fetch: opts.config?.fetch as any,
+            }).pipe(Effect.either);
 
             // Get first route for callbacks
-            const routeKey = Object.keys(opts.router)[0];
+            const routeKey = routeKeyToUse;
             if (routeKey) {
                 const route = opts.router[routeKey];
                 const adapterArgs = yield* AdapterArguments.pipe(
@@ -241,25 +243,53 @@ export const createRequestHandler = <
                 );
 
                 try {
-                    // Execute middleware
-                    const metadata = route.middleware({
-                        input: { md5Hash },
-                        ...adapterArgs,
-                    });
+                    // Execute middleware (supports sync or async)
+                    const metadata = yield* Effect.promise(() =>
+                        Promise.resolve(
+                            route.middleware({
+                                input: { md5Hash },
+                                ...adapterArgs,
+                            })
+                        )
+                    );
 
                     // Check if verification was successful
                     if (verificationResult._tag === "Right") {
                         const successData = verificationResult.right;
 
-                        // Execute completion callback
-                        const result = route.onTransactionComplete({
-                            metadata,
-                            transactionId:
-                                successData.transactionId || `tx_${Date.now()}`,
-                            md5Hash,
-                            bankingResponse: successData,
-                            ...adapterArgs,
-                        });
+                        // Try to execute completion callback, but do not fail the response if it throws
+                        let callbackResult: unknown = undefined;
+                        try {
+                            callbackResult = yield* Effect.promise(() =>
+                                Promise.resolve(
+                                    route.onTransactionComplete({
+                                        metadata,
+                                        transactionId:
+                                            successData.transactionId,
+                                        md5Hash,
+                                        bankingResponse: successData,
+                                        ...adapterArgs,
+                                    })
+                                )
+                            );
+                        } catch (err) {
+                            // Best-effort error callback; don't break success flow
+                            yield* Effect.promise(() =>
+                                Promise.resolve(
+                                    route.onTransactionError({
+                                        error: new VeluyError({
+                                            code: "INTERNAL_SERVER_ERROR",
+                                            message: "Callback error",
+                                            cause: err,
+                                        }),
+                                        transactionId:
+                                            successData.transactionId,
+                                        md5Hash,
+                                        ...adapterArgs,
+                                    })
+                                )
+                            ).pipe(Effect.ignore);
+                        }
 
                         return yield* HttpServerResponse.json({
                             status: {
@@ -269,7 +299,7 @@ export const createRequestHandler = <
                             },
                             data: {
                                 ...successData,
-                                callbackResult: result,
+                                callbackResult,
                             },
                         });
                     } else {
@@ -281,7 +311,6 @@ export const createRequestHandler = <
                                 code: "BAD_REQUEST",
                                 message: errorResponse.status.message,
                             }),
-                            transactionId: `tx_${Date.now()}`,
                             md5Hash,
                             ...adapterArgs,
                         });
@@ -292,18 +321,21 @@ export const createRequestHandler = <
                     }
                 } catch (error) {
                     // Execute error callback
-                    route.onTransactionError({
-                        error: new VeluyError({
-                            code: "INTERNAL_SERVER_ERROR",
-                            message:
-                                KHQR_ERROR_MESSAGES[
-                                    KHQR_ERROR_CODES.TRANSACTION_FAILED
-                                ],
-                        }),
-                        transactionId: `tx_${Date.now()}`,
-                        md5Hash,
-                        ...adapterArgs,
-                    });
+                    yield* Effect.promise(() =>
+                        Promise.resolve(
+                            route.onTransactionError({
+                                error: new VeluyError({
+                                    code: "INTERNAL_SERVER_ERROR",
+                                    message:
+                                        KHQR_ERROR_MESSAGES[
+                                            KHQR_ERROR_CODES.TRANSACTION_FAILED
+                                        ],
+                                }),
+                                md5Hash,
+                                ...adapterArgs,
+                            })
+                        )
+                    );
 
                     return yield* HttpServerResponse.json(
                         bakongError(
@@ -318,9 +350,13 @@ export const createRequestHandler = <
             }
 
             // Fallback response if no routes are found
-            const fallbackResult = yield* handleCheckTransaction(md5Hash).pipe(
-                Effect.either
-            );
+            const fallbackResult = yield* handleCheckTransaction(md5Hash, {
+                bankingApiUrl: opts.config?.bankingApiUrl,
+                verifyEndpoint: (opts.config as any)?.verifyEndpoint,
+                verifyMethod: (opts.config as any)?.verifyMethod,
+                token: opts.config?.token,
+                fetch: opts.config?.fetch as any,
+            }).pipe(Effect.either);
 
             if (fallbackResult._tag === "Right") {
                 return yield* HttpServerResponse.json({
@@ -361,31 +397,186 @@ export const createRequestHandler = <
     }).pipe(Effect.withLogSpan("createRequestHandler"));
 
 const handleCheckTransaction = (
-    md5Hash: string
+    md5Hash: string,
+    cfg: {
+        bankingApiUrl?: string;
+        verifyEndpoint?: string;
+        verifyMethod?: "GET" | "POST";
+        token?: string;
+        tokenHeader?: string;
+        tokenPrefix?: string;
+        verifyQueryParamName?: string;
+        fetch?: typeof fetch;
+    }
 ): Effect.Effect<TransactionVerificationData, BakongResponse> => {
     return Effect.gen(function* () {
         // Validate MD5 hash
         const validatedHash = yield* validateMD5Hash(md5Hash);
 
-        try {
-            // Mock transaction verification - replace with actual banking API
-            const verificationData: TransactionVerificationData = {
-                status: "verified",
-                transactionId: `tx_${Date.now()}`,
-                verified: true,
-                timestamp: new Date().toISOString(),
-                md5Hash: validatedHash,
-            };
+        // Build request
+        const baseUrl =
+            (typeof cfg.bankingApiUrl === "string" &&
+                cfg.bankingApiUrl.replace(/\/$/, "")) ||
+            "https://api-bakong.nbc.gov.kh";
+        const verifyEndpoint = cfg.verifyEndpoint || "/pg/check-transaction";
+        const method: "GET" | "POST" = cfg.verifyMethod || "POST";
+        const token = cfg.token;
+        const tokenHeader = cfg.tokenHeader || "Authorization";
+        const tokenPrefix = cfg.tokenPrefix ?? "Bearer";
+        const verifyQueryParamName = cfg.verifyQueryParamName || "md5Hash";
 
-            return verificationData;
-        } catch (error) {
+        const url =
+            method === "GET"
+                ? `${baseUrl}${verifyEndpoint}?${encodeURIComponent(
+                      verifyQueryParamName
+                  )}=${encodeURIComponent(validatedHash)}`
+                : `${baseUrl}${verifyEndpoint}`;
+
+        const doFetch = cfg.fetch ?? fetch;
+
+        const headers: Record<string, string> = {};
+        if (method === "POST") {
+            headers["Content-Type"] = "application/json";
+        }
+        if (token) {
+            headers[tokenHeader] = tokenPrefix
+                ? `${tokenPrefix} ${token}`
+                : token;
+        }
+
+        const res = yield* Effect.tryPromise({
+            try: () =>
+                doFetch(url, {
+                    method,
+                    headers,
+                    body:
+                        method === "POST"
+                            ? JSON.stringify({
+                                  [verifyQueryParamName]: validatedHash,
+                              })
+                            : undefined,
+                } as RequestInit),
+            catch: (e) => e as Error,
+        }).pipe(
+            Effect.catchAll(() =>
+                failBakong(
+                    KHQR_ERROR_CODES.CANNOT_CONNECT_TO_SERVER,
+                    KHQR_ERROR_MESSAGES[
+                        KHQR_ERROR_CODES.CANNOT_CONNECT_TO_SERVER
+                    ]
+                )
+            )
+        );
+
+        // Map HTTP errors to Bakong error codes
+        if (!res.ok) {
+            const code = mapHttpStatusToErrorCode(res.status);
+            return yield* failBakong(code, KHQR_ERROR_MESSAGES[code]);
+        }
+
+        // Parse JSON body
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
             return yield* failBakong(
-                KHQR_ERROR_CODES.CANNOT_CONNECT_TO_SERVER,
-                KHQR_ERROR_MESSAGES[KHQR_ERROR_CODES.CANNOT_CONNECT_TO_SERVER]
+                KHQR_ERROR_CODES.TRANSACTION_FAILED,
+                KHQR_ERROR_MESSAGES[KHQR_ERROR_CODES.TRANSACTION_FAILED]
             );
         }
+
+        const json: any = yield* Effect.tryPromise({
+            try: () => res.json(),
+            catch: (e) => e as Error,
+        }).pipe(
+            Effect.catchAll(() =>
+                failBakong(
+                    KHQR_ERROR_CODES.TRANSACTION_FAILED,
+                    KHQR_ERROR_MESSAGES[KHQR_ERROR_CODES.TRANSACTION_FAILED]
+                )
+            )
+        );
+
+        // If response already matches our BakongResponse envelope
+        if (
+            json &&
+            json.status &&
+            typeof json.status.code === "number" &&
+            (json.status.code === 0 || json.status.code === 1)
+        ) {
+            if (json.status.code === 0) {
+                // Success, try to map data if present
+                const mapped: TransactionVerificationData = mapVerificationData(
+                    json.data ?? {},
+                    validatedHash
+                );
+                return mapped;
+            } else {
+                return yield* failBakong(
+                    json.status.errorCode ??
+                        KHQR_ERROR_CODES.TRANSACTION_FAILED,
+                    json.status.message ||
+                        KHQR_ERROR_MESSAGES[
+                            json.status.errorCode ??
+                                KHQR_ERROR_CODES.TRANSACTION_FAILED
+                        ]
+                );
+            }
+        }
+
+        // Otherwise, attempt to map from Bakong Open API transaction info format
+        const mapped: TransactionVerificationData = mapVerificationData(
+            json,
+            validatedHash
+        );
+        return mapped;
     });
 };
+
+function mapHttpStatusToErrorCode(status: number): number {
+    switch (status) {
+        case 400:
+            return KHQR_ERROR_CODES.MISSING_REQUIRED_FIELDS;
+        case 401:
+            return KHQR_ERROR_CODES.UNAUTHORIZED;
+        case 403:
+            return KHQR_ERROR_CODES.UNAUTHORIZED;
+        case 404:
+            return KHQR_ERROR_CODES.TRANSACTION_NOT_FOUND;
+        case 429:
+            return KHQR_ERROR_CODES.CANNOT_CONNECT_TO_SERVER;
+        case 500:
+        default:
+            return KHQR_ERROR_CODES.TRANSACTION_FAILED;
+    }
+}
+
+function mapVerificationData(
+    json: any,
+    md5Hash: string
+): TransactionVerificationData {
+    // Attempt to normalize a few likely shapes
+    const statusField = (
+        json?.status ??
+        json?.Status ??
+        json?.result ??
+        ""
+    ).toString();
+    const isVerified =
+        typeof json?.verified === "boolean"
+            ? json.verified
+            : /success/i.test(statusField);
+    const transactionId =
+        (json?.transactionId ?? json?.TransactionId ?? json?.transaction_id) ||
+        undefined;
+    const timestamp =
+        (json?.timestamp ?? json?.TransactionDate ?? json?.date) || undefined;
+    return {
+        status: statusField || (isVerified ? "Success" : "Failed"),
+        transactionId,
+        verified: Boolean(isVerified),
+        timestamp,
+        md5Hash,
+    };
+}
 
 const validateMD5Hash = (
     hash: string
