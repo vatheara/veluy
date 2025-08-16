@@ -132,7 +132,7 @@ export interface VeluyBuilder<TParams extends AnyParams> {
     _errorFn: TParams["_errorFn"];
     _output: UnsetMarker;
   }>;
-  onTransactionError: (
+  onError: (
     fn: TParams["_errorFn"] extends UnsetMarker
       ? TransactionErrorFn<TParams["_adapterFnArgs"]>
       : ErrorMessage<"onTransactionError is already set">,
@@ -145,7 +145,7 @@ export interface VeluyBuilder<TParams extends AnyParams> {
     _errorFn: TransactionErrorFn<TParams["_adapterFnArgs"]>;
     _output: UnsetMarker;
   }>;
-  onTransactionComplete: <TOutput extends JsonObject | void>(
+  onComplete: <TOutput extends JsonObject | void>(
     fn: TransactionCompleteFn<
       Simplify<
         TParams["_metadata"] extends UnsetMarker
@@ -183,9 +183,9 @@ export interface TransactionRoute<TTypes extends AnyBuiltTransactionTypes> {
   routeOptions: RouteOptions;
   inputParser: JsonParser<any>;
   middleware: MiddlewareFn<any, ValidMiddlewareObject, any>;
-  onTransactionError: TransactionErrorFn<any>;
+  onError: TransactionErrorFn<any>;
   errorFormatter: (err: VeluyError) => any;
-  onTransactionComplete: TransactionCompleteFn<any, any, any>;
+  onComplete: TransactionCompleteFn<any, any, any>;
 }
 export type AnyTransactionRoute = TransactionRoute<AnyBuiltTransactionTypes>;
 

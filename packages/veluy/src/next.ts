@@ -26,6 +26,10 @@ export const createVeluy = <TErrorShape extends Json>(
   opts?: CreateBuilderOptions<TErrorShape>,
 ) => createBuilder<AdapterArgs, TErrorShape>(opts);
 
+export const createVeluyQR = <TErrorShape extends Json>(
+  opts?: CreateBuilderOptions<TErrorShape>,
+) => createBuilder<AdapterArgs, TErrorShape>(opts);
+
 export const createRouteHandler = <TRouter extends TransactionRouter>(
   opts: RouteHandlerOptions<TRouter>,
 ) => {

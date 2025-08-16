@@ -1,8 +1,17 @@
-import { createVeluy } from "../../../../../../packages/veluy/src/next";
+import { createVeluy, createVeluyQR } from "../../../../../../packages/veluy/src/next";
 import { type TransactionRouter } from "../../../../../../packages/veluy/src/types";
-import { SimpleStorage } from "../../../lib/simple-storage";
+import { SimpleStorage } from "@/lib/simple-storage";
 
 const f = createVeluy({
+  errorFormatter: (err) => {
+    console.log("Error in transaction", err.message);
+    console.log("  - Above error caused by:", err.cause);
+    return { message: err.message };
+  },
+});
+
+// TODO: create router for generate qr string
+const qr = createVeluyQR({
   errorFormatter: (err) => {
     console.log("Error in transaction", err.message);
     console.log("  - Above error caused by:", err.cause);
@@ -19,7 +28,7 @@ export const ourTransactionRouter = {
       // This code runs on your server before checking the transaction
       return { userId: "test" };
     })
-    .onTransactionComplete(async ({ metadata, bankingResponse }) => {
+    .onComplete(async ({ metadata, bankingResponse }) => {
       // This code RUNS ON YOUR SERVER after checking the transaction
       console.log("Transaction complete for userId:", metadata.userId);
       console.log("banking response ", bankingResponse);
@@ -61,8 +70,8 @@ export const ourTransactionRouter = {
       // This code runs on your server before checking the transaction
       return { userId: "test" };
     })
-    .onTransactionError((e) => console.log("$$$$$$$$$$$$$$error", e))
-    .onTransactionComplete(async ({ metadata, bankingResponse }) => {
+    .onError((e) => console.log("$$$$$$$$$$$$$$error", e))
+    .onComplete(async ({ metadata, bankingResponse }) => {
       // This code RUNS ON YOUR SERVER after checking the transaction
       console.log("Transaction complete for userId:", metadata.userId);
       console.log("banking response ", bankingResponse);
@@ -94,6 +103,6 @@ export const ourTransactionRouter = {
         return { transactionBy: metadata.userId, error: "Failed to process transaction" };
       }
     }),
-} satisfies TransactionRouter;
+} //satisfies TransactionRouter;
 
 export type OurTransactionRouter = typeof ourTransactionRouter;

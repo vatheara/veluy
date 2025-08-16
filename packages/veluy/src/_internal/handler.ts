@@ -3,6 +3,7 @@ import {
   HttpRouter,
   HttpServerResponse,
   HttpServerRequest,
+  HttpClientResponse,
 } from "@effect/platform";
 import * as HttpClient from "@effect/platform/HttpClient";
 import * as HttpClientRequest from "@effect/platform/HttpClientRequest";
@@ -156,24 +157,24 @@ export const createRequestHandler = <
       }
 
       // Mock banking API call - replace with actual banking API integration
-      const client = yield* HttpClient.HttpClient;
+      const client = (yield* HttpClient.HttpClient).pipe(
+        HttpClient.filterStatusOk,
+      );
       const bankingResponse = yield* HttpClientRequest.post(
         "http://localhost:9000/v1/check_transaction_by_md5",
-      )
-        .pipe(
-          HttpClientRequest.setHeader("Authorization", "Bearer 123456789"),
-          HttpClientRequest.bodyJson({
-            md5: md5,
-          }),
-          Effect.flatMap(client.execute),
-          Effect.flatMap((res) => res.json),
-        )
-        .pipe(Effect.provide(FetchHttpClient.layer));
+      ).pipe(
+        HttpClientRequest.setHeader("Authorization", "Bearer 123456789"),
+        HttpClientRequest.bodyJson({
+          md5: md5,
+        }),
+        Effect.flatMap(client.execute),
+        Effect.flatMap((res) => res.json),
+        Effect.provide(FetchHttpClient.layer),
+      );
 
       yield* Effect.log("bankingResponse$$", bankingResponse);
 
       // handle route callbacks
-
       const fiber = yield* Effect.gen(function* () {
         const adapterArgs = yield* AdapterArguments;
         const runMiddleware = yield* Effect.tryPromise({
@@ -194,7 +195,7 @@ export const createRequestHandler = <
 
         yield* Effect.tryPromise({
           try: async () =>
-            route.onTransactionComplete({
+            route.onComplete({
               metadata: runMiddleware,
               transactionId: `tx_${Date.now()}`,
               md5,
@@ -252,12 +253,3 @@ export const createRequestHandler = <
       HttpRouter.use(appendResponseHeaders),
     );
   }).pipe(Effect.withLogSpan("createRequestHandler"));
-
-const handleCheckTransaction = (md5Hash: string) => {
-  return Effect.gen(function* () {
-    const request = yield* HttpServerRequest.HttpServerRequest;
-    const body = yield* request.json.pipe(
-      Effect.catchAll(() => Effect.succeed(null)),
-    );
-  });
-};

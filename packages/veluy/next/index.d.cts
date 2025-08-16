@@ -10,7 +10,7 @@ export { TransactionRouter } from '../types/index.js';
 type AdapterArgs = {
     req: NextRequest;
 };
-declare const createVeluy: <TErrorShape extends Json>(opts?: CreateBuilderOptions<TErrorShape>) => <TRouteOptions extends _veluy_shared.RouteOptions>(input: any, config?: TRouteOptions) => ___internal_types.VeluyBuilder<{
+declare const createVeluy: <TErrorShape extends Json>(opts?: CreateBuilderOptions<TErrorShape>) => <TRouteOptions extends _veluy_shared.RouteOptions>(input: any, config?: TRouteOptions | undefined) => ___internal_types.VeluyBuilder<{
     _routeOptions: TRouteOptions;
     _input: {
         in: ___internal_types.UnsetMarker;

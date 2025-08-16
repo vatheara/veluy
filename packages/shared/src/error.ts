@@ -10,19 +10,12 @@ const ERROR_CODES = {
   FORBIDDEN: 403,
   INTERNAL_SERVER_ERROR: 500,
   INTERNAL_CLIENT_ERROR: 500,
+  UNAUTHORIZED: 401,
+  TOO_MANY_REQUESTS: 429,
 
-  // S3 specific
-  TOO_LARGE: 413,
-  TOO_SMALL: 400,
-  TOO_MANY_FILES: 400,
-  KEY_TOO_LONG: 400,
-
-  // UploadThing specific
-  URL_GENERATION_FAILED: 500,
-  UPLOAD_FAILED: 500,
+  // Veluy specific
   MISSING_ENV: 500,
   INVALID_SERVER_CONFIG: 500,
-  FILE_LIMIT_EXCEEDED: 500,
 } as const;
 
 type ErrorCode = keyof typeof ERROR_CODES;
@@ -124,6 +117,6 @@ export function getStatusCodeFromError(error: VeluyError<any>) {
 export const INTERNAL_DO_NOT_USE__fatalClientError = (e: Error) =>
   new VeluyError({
     code: "INTERNAL_CLIENT_ERROR",
-    message: "Something went wrong. Please report this to UploadThing.",
+    message: "Something went wrong. Please report this to Veluy.",
     cause: e,
   });

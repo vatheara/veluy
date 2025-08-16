@@ -69,10 +69,10 @@ function internalCreateBuilder<
     },
 
     middleware: () => ({}),
-    onTransactionError: () => {
+    onError: () => {
       // noop
     },
-    onTransactionComplete: () => undefined,
+    onComplete: () => undefined,
 
     errorFormatter: initDef.errorFormatter ?? defaultErrorFormatter,
 
@@ -93,16 +93,16 @@ function internalCreateBuilder<
         middleware: userMiddleware,
       }) as VeluyBuilder<any>;
     },
-    onTransactionComplete(userTransactionComplete) {
+    onComplete(useOnComplete) {
       return {
         ..._def,
-        onTransactionComplete: userTransactionComplete,
+        onComplete: useOnComplete,
       } as AnyTransactionRoute;
     },
-    onTransactionError(userOnTransactionError) {
+    onError(userOnError) {
       return internalCreateBuilder({
         ..._def,
-        onTransactionError: userOnTransactionError,
+        onError: userOnError,
       }) as VeluyBuilder<any>;
     },
   };
