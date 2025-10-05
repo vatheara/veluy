@@ -40,7 +40,8 @@
   "dependencies": {
     "@effect/platform": "^0.84.3",
     "@veluy/shared": "workspace:*",
-    "effect": "^3.16.16"
+    "effect": "^3.16.16",
+    "ts-khqr": "^2.2.1"
   },
   "devDependencies": {
     "@effect/language-service": "^0.27.2",

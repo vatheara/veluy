@@ -36,10 +36,9 @@ interface KhqrDialogStore {
   setMerchantName: (merchantName: string) => void;
   // Actions
   resetTransaction: () => void;
-  generateQR: () => void;
 }
 
-export const useKhqr = create<KhqrDialogStore>((set, get) => ({
+export const useKhqr = create<KhqrDialogStore>()((set, get) => ({
   sessionTime: 180,
   expired: false,
   isOpen: false,
@@ -49,8 +48,8 @@ export const useKhqr = create<KhqrDialogStore>((set, get) => ({
   transactionStatus: "idle",
   qrstring: "",
   md5: "",
-  amount: 9,
-  merchantName: "Domnossrai",
+  amount: 0,
+  merchantName: "",
   setIsOpen: (isOpen) => set({ isOpen }),
   setSessionTime: (sessionTime) => set({ sessionTime }),
   setTitle: (title) => set({ title }),
@@ -71,30 +70,4 @@ export const useKhqr = create<KhqrDialogStore>((set, get) => ({
       expired: false,
       sessionTime: 180,
     }),
-  generateQR: () => {
-    const { amount, merchantName } = get();
-
-    // Import KHQR dynamically to avoid build issues
-    import("ts-khqr")
-      .then(({ KHQR, TAG, CURRENCY }) => {
-        const result = KHQR.generate({
-          tag: TAG.INDIVIDUAL,
-          accountID: "va_theara1@aclb",
-          merchantName,
-          currency: CURRENCY.USD,
-          amount,
-        });
-
-        if (result.data) {
-          set({
-            qrstring: result.data.qr,
-            md5: result.data.md5,
-            sessionTime: 180,
-            expired: false,
-            transactionStatus: "pending", // Update status when QR is ready
-          });
-        }
-      })
-      .catch(console.error);
-  },
 }));

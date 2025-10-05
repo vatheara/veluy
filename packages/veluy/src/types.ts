@@ -12,7 +12,6 @@ import type { AnyTransactionRoute, TransactionRoute } from "./_internal/types";
 
 export type { EndpointMetadata, ExpandedRouteConfig } from "@veluy/shared";
 
-export type { UTRegionAlias } from "./_internal/types";
 
 export type { TransactionRoute, AnyTransactionRoute };
 export type TransactionRouter = Record<string, AnyTransactionRoute>;

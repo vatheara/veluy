@@ -15,7 +15,37 @@ import { useState, useEffect, useRef } from "react";
 import LoadingSpinner from "./loading-spinner";
 import { FiClock } from "react-icons/fi";
 
+import useSWR, { SWRConfiguration } from 'swr'
+import { z } from 'zod'
+import { ResponseResult, ReturnType } from "ts-khqr";
+
+const qrSchema: z.ZodType<ReturnType<ResponseResult>> = z.object({
+  status: z.object({
+    code: z.number(),
+    message: z.string().nullable(),
+    errorCode: z.number().nullable(),
+  }),
+  data: z.object({
+    qr: z.string(),
+    md5: z.string(),
+  }),
+})
+
+const useQr = (options?: SWRConfiguration) => {
+  const fetcher = async (url: string) => {
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error('Failed to fetch data');
+    }
+    const data = await res.json();
+    return qrSchema.parse(data); 
+  };
+  return useSWR('/api/veluy', fetcher, options)
+}
+
 export const KhqrDialog = () => {
+  const { data, isLoading, error } = useQr()
+  console.log("QR data: ",data , "error: ",error)
   const {
     isOpen,
     title,
@@ -30,7 +60,6 @@ export const KhqrDialog = () => {
     md5,
     amount,
     merchantName,
-    generateQR,
     resetTransaction,
   } = useKhqr();
 
@@ -58,7 +87,7 @@ export const KhqrDialog = () => {
   };
 
   const handleTryAgain = () => {
-    generateQR();
+    // generateQR();
   };
 
   return (

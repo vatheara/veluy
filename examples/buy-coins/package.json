@@ -17,6 +17,7 @@
     "@radix-ui/react-slot": "^1.2.2",
     "@repo/ui": "workspace:*",
     "@weluy/react": "1.0.0-alpha.2",
+    "bakong-khqr": "^1.0.20",
     "better-auth": "^1.3.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -28,7 +29,7 @@
     "react-dom": "^19.0.0",
     "react-icons": "^5.0.0",
     "tailwind-merge": "^3.3.0",
-    "ts-khqr": "^1.0.0",
+    "ts-khqr": "^2.2.2",
     "zustand": "^5.0.0"
   },
   "devDependencies": {

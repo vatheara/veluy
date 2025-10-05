@@ -26,6 +26,8 @@
  */
 
 import type { Json, RouteOptions, VeluyError } from "@veluy/shared";
+import type { QRPayload } from "ts-khqr";
+import { TAG, CURRENCY } from "ts-khqr";
 
 import { defaultErrorFormatter } from "./error-formatter";
 import type {
@@ -54,9 +56,9 @@ function internalCreateBuilder<
     $types: {} as AnyBuiltTransactionTypes,
     // Default transaction config
     routerConfig: {
-      transaction: {
-        timeout: "30s",
-      },
+      tag: '',
+      accountID:'',
+      merchantName:''
     },
     routeOptions: {
       awaitServerData: true,
@@ -125,7 +127,7 @@ export function createBuilder<
   TErrorShape extends Json = { message: string },
 >(opts?: CreateBuilderOptions<TErrorShape>) {
   return <TRouteOptions extends RouteOptions>(
-    input: any,
+    input: QRPayload,
     config?: TRouteOptions,
   ): VeluyBuilder<{
     _routeOptions: TRouteOptions;

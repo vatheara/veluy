@@ -1,5 +1,3 @@
-import type { Schema } from "effect/Schema";
-
 import type {
   ErrorMessage,
   Json,
@@ -9,51 +7,11 @@ import type {
   Simplify,
   VeluyError,
 } from "@veluy/shared";
-
 import type { JsonParser } from "./parser";
-import type { NewPresignedUrl, UploadActionPayload } from "./shared-schemas";
-
-export type UTRegionAlias =
-  | "bom1"
-  | "icn1"
-  | "syd1"
-  | "can1"
-  | "fra1"
-  | "zrh1"
-  | "dub1"
-  | "cle1"
-  | "sfo1"
-  | "sea1";
-
-/**
- * Marker used to select the region based on the incoming request
- */
-export const UTRegion = Symbol("veluy-region-symbol");
-
-/**
- * Marker used to append custom metadata to transaction data in `.middleware()`
- * @example
- * ```ts
- * .middleware((opts) => {
- *   return {
- *     [UTTransactionData]: {
- *       customId: generateId(),
- *       userId: opts.input.userId,
- *     }
- *   };
- * })
- * ```
- */
-export const UTTransactionData = Symbol("veluy-transaction-data-symbol");
+import type { QRPayload } from "ts-khqr";
 
 export type UnsetMarker = "unsetMarker" & {
   __brand: "unsetMarker";
-};
-
-export type ValidMiddlewareObject = {
-  [UTRegion]?: UTRegionAlias;
-  [UTTransactionData]?: Record<string, unknown>;
-  [key: string]: unknown;
 };
 
 export interface AnyParams {
@@ -71,7 +29,7 @@ export interface AnyParams {
 
 type MiddlewareFn<
   TInput extends Json | UnsetMarker,
-  TOutput extends ValidMiddlewareObject,
+  TOutput extends JsonObject,
   TArgs extends Record<string, unknown>,
 > = (
   opts: TArgs & {
@@ -115,7 +73,7 @@ export interface VeluyBuilder<TParams extends AnyParams> {
     _errorFn: TParams["_errorFn"];
     _output: UnsetMarker;
   }>;
-  middleware: <TOutput extends ValidMiddlewareObject>(
+  middleware: <TOutput extends JsonObject>(
     fn: TParams["_metadata"] extends UnsetMarker
       ? MiddlewareFn<
           TParams["_input"]["out"],
@@ -150,10 +108,7 @@ export interface VeluyBuilder<TParams extends AnyParams> {
       Simplify<
         TParams["_metadata"] extends UnsetMarker
           ? undefined
-          : Omit<
-              TParams["_metadata"],
-              typeof UTTransactionData | typeof UTRegion
-            >
+          : TParams["_metadata"]
       >,
       TOutput,
       TParams["_adapterFnArgs"]
@@ -179,10 +134,10 @@ export type AnyBuiltTransactionTypes = {
 
 export interface TransactionRoute<TTypes extends AnyBuiltTransactionTypes> {
   $types: TTypes;
-  routerConfig: any;
+  routerConfig: QRPayload; 
   routeOptions: RouteOptions;
   inputParser: JsonParser<any>;
-  middleware: MiddlewareFn<any, ValidMiddlewareObject, any>;
+  middleware: MiddlewareFn<any, JsonObject, any>;
   onError: TransactionErrorFn<any>;
   errorFormatter: (err: VeluyError) => any;
   onComplete: TransactionCompleteFn<any, any, any>;

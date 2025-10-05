@@ -1,5 +1,5 @@
-import { createVeluy, createVeluyQR } from "../../../../../../packages/veluy/src/next";
-import { type TransactionRouter } from "../../../../../../packages/veluy/src/types";
+import { createVeluy , TAG, CURRENCY} from "veluy/next";
+import type { TransactionRouter } from "veluy/next";
 import { SimpleStorage } from "@/lib/simple-storage";
 
 const f = createVeluy({
@@ -10,19 +10,17 @@ const f = createVeluy({
   },
 });
 
-// TODO: create router for generate qr string
-const qr = createVeluyQR({
-  errorFormatter: (err) => {
-    console.log("Error in transaction", err.message);
-    console.log("  - Above error caused by:", err.cause);
-    return { message: err.message };
-  },
-});
 
 // TransactionRouter for your app, can contain multiple TransactionRoutes
 export const ourTransactionRouter = {
   // Define as many TransactionRoutes as you like, each with a unique routeSlug
-  monthlySub: f({ any: "any" })
+  monthlySub: f({
+    tag: TAG.INDIVIDUAL,
+    accountID: 'test',
+    merchantName: 'test',
+    currency: CURRENCY.KHR,
+    amount: 10000,
+  })
     // Set permissions and file types for this FileRoute
     .middleware(async () => {
       // This code runs on your server before checking the transaction
@@ -64,7 +62,13 @@ export const ourTransactionRouter = {
         return { transactionBy: metadata.userId, error: "Failed to process transaction" };
       }
     }),
-  yearlySub: f({ any: "any" })
+  yearlySub: f({ 
+    tag: TAG.INDIVIDUAL,
+    accountID: 'test',
+    merchantName: 'test',
+    currency: CURRENCY.KHR,
+    amount: 10000,
+   }) 
     // Set permissions and file types for this FileRoute
     .middleware(async () => {
       // This code runs on your server before checking the transaction
@@ -103,6 +107,6 @@ export const ourTransactionRouter = {
         return { transactionBy: metadata.userId, error: "Failed to process transaction" };
       }
     }),
-} //satisfies TransactionRouter;
+} satisfies TransactionRouter;
 
 export type OurTransactionRouter = typeof ourTransactionRouter;
